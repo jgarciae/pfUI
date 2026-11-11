@@ -1,4 +1,4 @@
-pfUI:RegisterModule("minimap", "vanilla:tbc", function ()
+pfUI:RegisterModule("minimap", "vanilla:tbc:wotlk", function ()
   local rawborder, border = GetBorderSize()
   local size = tonumber(C.appearance.minimap.size) or 140
 
@@ -92,6 +92,23 @@ pfUI:RegisterModule("minimap", "vanilla:tbc", function ()
       ToggleDropDownMenu(1, nil, MiniMapBattlefieldDropDown, "MiniMapBattlefieldFrame", -95, -5)
     end
   end)
+
+  -- looking for group eye (wotlk)
+  if MiniMapLFGFrame then
+    MiniMapLFGFrame:SetParent(pfUI.minimap)
+    MiniMapLFGFrame:ClearAllPoints()
+    MiniMapLFGFrame:SetPoint("BOTTOMLEFT", Minimap, -4, -4)
+    if MiniMapLFGBorder then MiniMapLFGBorder:Hide() end
+  end
+
+  -- dungeon difficulty flag (wotlk)
+  -- WOTLK-CHECK: parent is MinimapCluster, which is left behind by pfUI
+  if MiniMapInstanceDifficulty then
+    MiniMapInstanceDifficulty:SetParent(pfUI.minimap)
+    MiniMapInstanceDifficulty:ClearAllPoints()
+    MiniMapInstanceDifficulty:SetPoint("TOPLEFT", pfUI.minimap, "TOPLEFT", 0, 0)
+    MiniMapInstanceDifficulty:SetFrameLevel(Minimap:GetFrameLevel() + 10)
+  end
 
   -- mail icon
   MiniMapMailFrame:ClearAllPoints()
