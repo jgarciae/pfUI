@@ -219,3 +219,10 @@ UNITFRAME_EXTRA_EVENTS = {
   "UNIT_RUNIC_POWER", "UNIT_MAXRUNIC_POWER",
   "UNIT_ENTERED_VEHICLE", "UNIT_EXITED_VEHICLE",
 }
+
+-- 3.x GetComboPoints(unit, target) needs the unit that owns the points (player
+-- or vehicle); vanilla/tbc take no (or an ignored) argument.
+function GetComboPoints()
+  local unit = (_G.UnitHasVehicleUI and _G.UnitHasVehicleUI("player")) and "vehicle" or "player"
+  return _G.GetComboPoints(unit, "target")
+end
