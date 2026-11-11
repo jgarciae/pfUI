@@ -838,25 +838,36 @@ pfUI:RegisterModule("panel", "vanilla:tbc:wotlk", function()
     pfUI.panel.microbutton:SetWidth(table.getn(MICRO_BUTTONS) * 18 + 1)
     pfUI.panel.microbutton:SetFrameStrata("MEDIUM")
 
-    for i=1,table.getn(MICRO_BUTTONS) do
-      local anchor = _G[MICRO_BUTTONS[i-1]] or pfUI.panel.microbutton
-      local button = _G[MICRO_BUTTONS[i]]
-      button:ClearAllPoints()
-      button:SetParent(pfUI.panel.microbutton)
-      if i == 1 then
-        button:SetPoint("LEFT", pfUI.panel.microbutton, "LEFT", 1, 10)
-      else
-        button:SetPoint("TOPLEFT", anchor, "TOPRIGHT", 1, 0)
-      end
+    -- the anchoring is kept in a function, the vehicle ui of 3.x moves the
+    -- buttons around and the vehicle module needs to restore it afterwards
+    local function AnchorMicroButtons()
+      for i=1,table.getn(MICRO_BUTTONS) do
+        local anchor = _G[MICRO_BUTTONS[i-1]] or pfUI.panel.microbutton
+        local button = _G[MICRO_BUTTONS[i]]
+        button:ClearAllPoints()
+        button:SetParent(pfUI.panel.microbutton)
+        if i == 1 then
+          button:SetPoint("LEFT", pfUI.panel.microbutton, "LEFT", 1, 10)
+        else
+          button:SetPoint("TOPLEFT", anchor, "TOPRIGHT", 1, 0)
+        end
 
-      button:SetScale(.6)
+        button:SetScale(.6)
+        button:Show()
+      end
+    end
+
+    for i=1,table.getn(MICRO_BUTTONS) do
+      local button = _G[MICRO_BUTTONS[i]]
       button.frame = CreateFrame("Frame", "backdrop", button)
       button.frame:SetScale(1.4)
       button.frame:SetPoint("TOPLEFT", button, "TOPLEFT", 1, -16)
       button.frame:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", -1, 1)
       CreateBackdrop(button.frame, default_border)
-      button:Show()
     end
+
+    AnchorMicroButtons()
+    pfUI.panel.microbutton.Anchor = AnchorMicroButtons
   end
 
 

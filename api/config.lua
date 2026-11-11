@@ -597,6 +597,11 @@ function pfUI:LoadConfig()
   pfUI:UpdateConfig("totems",     nil,           "spacing",          "3")
   pfUI:UpdateConfig("totems",     nil,           "showbg",           "0")
 
+  pfUI:UpdateConfig("runes",      nil,           "enable",           "1")
+  pfUI:UpdateConfig("runes",      nil,           "size",             "22")
+  pfUI:UpdateConfig("runes",      nil,           "spacing",          "3")
+  pfUI:UpdateConfig("runes",      nil,           "showtext",         "1")
+
   pfUI:UpdateConfig("panel",      nil,           "use_unitfonts",    "0")
   pfUI:UpdateConfig("panel",      nil,           "hide_leftchat",    "0")
   pfUI:UpdateConfig("panel",      nil,           "hide_rightchat",   "0")
