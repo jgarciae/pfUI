@@ -27,6 +27,10 @@ pfUI:RegisterModule("addonbuttons", "vanilla:tbc", function ()
     "FWGMinimapPOI",
     "RecipeRadarMinimapIcon",
     "MiniMapTracking",
+    "MiniMapLFGFrame",
+    "MiniMapInstanceDifficulty",
+    "MiniMapRecordingButton",
+    "MiniMapWorldMapButton",
     "CartographerNotesPOI"
   }
 

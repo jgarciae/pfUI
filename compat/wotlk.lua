@@ -91,3 +91,9 @@ function GetFactionInfo(index)
   return name, description, standingID, barMin, barMax, barValue, atWarWith,
     canToggleAtWar, isHeader, isCollapsed, isWatched, isChild
 end
+
+-- pfUI.SetupCVars (pfUI.lua) runs in the global environment and calls these
+-- TBC tutorial helpers. WOTLK-CHECK: neither is defined in the 3.3.5 FrameXML
+-- (ClearTutorials is a client API, TutorialFrame_HideAllAlerts is gone).
+_G.TutorialFrame_HideAllAlerts = _G.TutorialFrame_HideAllAlerts or function() end
+_G.ClearTutorials = _G.ClearTutorials or function() end
