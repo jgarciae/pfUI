@@ -67,8 +67,14 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc:wotlk", function ()
     return txt
   end
 
-  -- 3.x re-shows the MainMenuBar when leaving a vehicle, block it as well
-  kill(MainMenuBar, pfUI.client >= 30000)
+  -- 3.x re-shows the MainMenuBar when leaving a vehicle. Replacing its Show
+  -- method would taint the vehicle code, so park it on a hidden parent instead.
+  if pfUI.client >= 30000 then
+    local hider = CreateFrame("Frame", nil, UIParent)
+    hider:Hide()
+    MainMenuBar:SetParent(hider)
+  end
+  kill(MainMenuBar)
 
   local blizzard_elements = { MultiBarBottomLeft,
     MultiBarBottomRight, MultiBarLeft, MultiBarRight }
