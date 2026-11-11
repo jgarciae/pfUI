@@ -168,11 +168,13 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc:wotlk", function ()
   }
 
   local button_animations = {
-    ["none"] = function()
+    ["none"] = function(self)
+      local this = self or this
       this.active = nil
       this:Hide()
     end,
-    ["zoomfade"] = function()
+    ["zoomfade"] = function(self)
+      local this = self or this
       if this.active == 0 then
         -- init animation
         this:SetWidth(this.parent:GetWidth())
@@ -195,7 +197,8 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc:wotlk", function ()
       this.active = nil
       this:Hide()
     end,
-    ["shrinkreturn"] = function()
+    ["shrinkreturn"] = function(self)
+      local this = self or this
       if this.active == 0 then
         -- init animation
         this:SetWidth(this.parent:GetWidth())
@@ -222,7 +225,8 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc:wotlk", function ()
       this:Hide()
       this.parent.icon:Show()
     end,
-    ["elasticzoom"] = function()
+    ["elasticzoom"] = function(self)
+      local this = self or this
       if this.active == 0 then
         -- init animation
         this:SetWidth(this.parent:GetWidth())
@@ -249,7 +253,8 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc:wotlk", function ()
       this:Hide()
       this.parent.icon:Show()
     end,
-    ["wobblezoom"] = function()
+    ["wobblezoom"] = function(self)
+      local this = self or this
       if this.active == 0 then
         -- init animation
         this:SetWidth(this.parent:GetWidth())
@@ -319,8 +324,11 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc:wotlk", function ()
   end
 
   local mouse
-  local function ButtonAnimate(self)
+  local function ButtonAnimate(self, button, down)
     local self = self or this
+    -- 3.x passes (self, button, down) instead of the arg1/keystate globals
+    local arg1 = button or arg1
+    local keystate = button and (down and "down" or "up") or keystate
     mouse = arg1 and not keystate
 
     -- trigger action animation
@@ -714,8 +722,9 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc:wotlk", function ()
     ButtonIsActiveUpdate(button)
   end
 
-  local function BarsEvent(self)
+  local function BarsEvent(self, event_, arg1_)
     local self = self or this
+    local event, arg1 = event_ or event, arg1_ or arg1
 
     -- refresh only specific slots
     if event == "ACTIONBAR_SLOT_CHANGED" and arg1 and arg1 ~= 0 then
@@ -809,7 +818,7 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc:wotlk", function ()
       updatecache[id] = nil
     end
 
-    if ( this.tick or .2) > GetTime() then return else this.tick = GetTime() + .2 end
+    if ( self.tick or .2) > GetTime() then return else self.tick = GetTime() + .2 end
 
     for id, button in pairs(buttoncache) do
       if button:IsShown() then ButtonRangeUpdate(button) end
@@ -1381,7 +1390,19 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc:wotlk", function ()
           bars[i]:RegisterEvent("PLAYER_ENTERING_WORLD")
           bars[i]:RegisterEvent("UPDATE_BONUS_ACTIONBAR")
           bars[i]:RegisterEvent("UPDATE_SHAPESHIFT_FORMS")
-          bars[i]:SetScript("OnEvent", function()
+          bars[i]:SetScript("OnEvent", function(self)
+            local this = self or this
+
+            -- protected frames can't be changed in combat, retry once it ends
+            if InCombatLockdown and InCombatLockdown() then
+              this.combatpending = true
+              this:RegisterEvent("PLAYER_REGEN_ENABLED")
+              return
+            elseif this.combatpending then
+              this.combatpending = nil
+              this:UnregisterEvent("PLAYER_REGEN_ENABLED")
+            end
+
             local count = GetNumShapeshiftForms()
             if count ~= this.lastCount then
               this.lastCount = count
@@ -1642,7 +1663,14 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc:wotlk", function ()
     -- rebind all existing bindings to our own buttons
     local keybinder = CreateFrame("Frame")
     keybinder:RegisterEvent("UPDATE_BINDINGS")
-    keybinder:SetScript("OnEvent", function()
+    keybinder:SetScript("OnEvent", function(self)
+      -- override bindings are protected, retry after combat
+      if InCombatLockdown and InCombatLockdown() then
+        keybinder:RegisterEvent("PLAYER_REGEN_ENABLED")
+        return
+      end
+      keybinder:UnregisterEvent("PLAYER_REGEN_ENABLED")
+
       for name, bar in pairs(bindwraps) do
         for i=1,12 do
           local key = GetBindingKey(format(name, i))
@@ -1662,7 +1690,8 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc:wotlk", function ()
   grid:RegisterEvent("PET_BAR_SHOWGRID")
   grid:RegisterEvent("PET_BAR_HIDEGRID")
 
-  grid:SetScript("OnEvent", function()
+  grid:SetScript("OnEvent", function(self, event_)
+    local event = event_ or event
     if event == "ACTIONBAR_SHOWGRID" then
       pfUI.bars:UpdateGrid(1)
     elseif event == "ACTIONBAR_HIDEGRID" then
@@ -1711,7 +1740,8 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc:wotlk", function ()
     reagentcounter:RegisterEvent("PLAYER_ENTERING_WORLD")
     reagentcounter:RegisterEvent("ACTIONBAR_SLOT_CHANGED")
     reagentcounter:RegisterEvent("BAG_UPDATE")
-    reagentcounter:SetScript("OnEvent", function()
+    reagentcounter:SetScript("OnEvent", function(self, event_)
+      local this, event = self or this, event_ or event
       if event == "BAG_UPDATE" then
         this.event = true
       else
@@ -1720,7 +1750,8 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc:wotlk", function ()
     end)
 
     -- limit events to one per second and smoothen action scanning
-    reagentcounter:SetScript("OnUpdate", function()
+    reagentcounter:SetScript("OnUpdate", function(self)
+      local this = self or this
       -- scan one action slot per frame
       if this.scan and this.scan <= 120 then
         UpdateSlot(this.scan)

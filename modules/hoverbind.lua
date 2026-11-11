@@ -139,7 +139,8 @@ pfUI:RegisterModule("hoverbind", "vanilla:tbc:wotlk", function ()
           frame.button = button
 
           local function GetHoverbindHandler(map)
-            return function()
+            return function(_, value)
+              local arg1 = value or arg1 -- 3.x passes the key/button/delta as handler argument
               if modifiers[arg1] then return end -- ignore single modifier keyup
 
               local prefix = pfUI.hoverbind:GetPrefix()
