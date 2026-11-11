@@ -55,6 +55,9 @@ ACTIONBAR_SECURE_TEMPLATE_BAR = "SecureHandlerStateTemplate"
 ACTIONBAR_SECURE_TEMPLATE_BUTTON = "SecureActionButtonTemplate"
 UNITFRAME_SECURE_TEMPLATE = "SecureUnitButtonTemplate"
 
+-- interface option globals (UVAR) that 3.x persists through a cvar, see uvarInfo in InterfaceOptionsFrame.lua
+UVAR_CVARS = { ["LOCK_ACTIONBAR"] = "lockActionBars" }
+
 --[[ WotLK API Extensions ]]--
 -- Present the 3.x return values in the vanilla layout the modules expect.
 function UnitBuff(unitstr, i)

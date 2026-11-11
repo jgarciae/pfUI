@@ -362,7 +362,7 @@ pfUI:RegisterModule("roll", "vanilla:tbc:wotlk", function ()
     end
 
     if extended then
-      pfUI.roll:SetButtonState(pfUI.roll.frames[id].need, canNeed, LOOT_ROLL_INELIGIBLE_REASON1 and _G["LOOT_ROLL_INELIGIBLE_REASON" .. (reasonNeed or "")])
+      pfUI.roll:SetButtonState(pfUI.roll.frames[id].need, canNeed, _G["LOOT_ROLL_INELIGIBLE_REASON" .. (reasonNeed or "")])
       pfUI.roll:SetButtonState(pfUI.roll.frames[id].greed, canGreed, _G["LOOT_ROLL_INELIGIBLE_REASON" .. (reasonGreed or "")])
 
       local dereason = _G["LOOT_ROLL_INELIGIBLE_REASON" .. (reasonDisenchant or "")]
