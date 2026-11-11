@@ -1,4 +1,4 @@
-pfUI:RegisterModule("autovendor", "vanilla:tbc", function ()
+pfUI:RegisterModule("autovendor", "vanilla:tbc:wotlk", function ()
   local rawborder, border = GetBorderSize()
   local bpad = rawborder > 1 and border - GetPerfectPixel() or GetPerfectPixel()
   local processed = {}
