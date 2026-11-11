@@ -209,3 +209,13 @@ ChatFrameEditBoxLanguage = _G.ChatFrame1EditBoxLanguage
 function FCF_SetChatWindowFontSize(chatFrame, fontSize)
   return _G.FCF_SetChatWindowFontSize(nil, chatFrame, fontSize)
 end
+
+-- ManaBarColor was renamed to PowerBarColor in 3.x (numeric indices kept)
+ManaBarColor = _G.ManaBarColor or _G.PowerBarColor
+
+-- additional unit events needed by 3.x unitframes: runic power (death
+-- knights) and vehicles; registered by api/unitframes.lua when defined.
+UNITFRAME_EXTRA_EVENTS = {
+  "UNIT_RUNIC_POWER", "UNIT_MAXRUNIC_POWER",
+  "UNIT_ENTERED_VEHICLE", "UNIT_EXITED_VEHICLE",
+}

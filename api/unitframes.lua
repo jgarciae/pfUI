@@ -1192,6 +1192,11 @@ function pfUI.uf:EnableEvents()
   f:RegisterEvent("UNIT_PET")
   f:RegisterEvent("UNIT_HAPPINESS")
 
+  -- expansion specific events (compat layer)
+  if UNITFRAME_EXTRA_EVENTS then
+    for _, event in pairs(UNITFRAME_EXTRA_EVENTS) do f:RegisterEvent(event) end
+  end
+
   f:RegisterForClicks('LeftButtonUp', 'RightButtonUp',
     'MiddleButtonUp', 'Button4Up', 'Button5Up')
 end
