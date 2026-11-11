@@ -1,4 +1,4 @@
-pfUI:RegisterModule("chat", "vanilla:tbc", function ()
+pfUI:RegisterModule("chat", "vanilla:tbc:wotlk", function ()
   local panelfont = C.panel.use_unitfonts == "1" and pfUI.font_unit or pfUI.font_default
   local panelfont_size = C.panel.use_unitfonts == "1" and C.global.font_unit_size or C.global.font_size
   local rawborder, default_border = GetBorderSize("chat")
@@ -541,6 +541,11 @@ pfUI:RegisterModule("chat", "vanilla:tbc", function ()
     ChatFrame_RemoveAllChannels(ChatFrame3)
 
     local normalg = { "SYSTEM", "SAY", "YELL", "WHISPER", "PARTY", "GUILD", "GUILD_OFFICER", "CREATURE", "CHANNEL", "EMOTE", "RAID", "RAID_LEADER", "RAID_WARNING", "BATTLEGROUND", "BATTLEGROUND_LEADER", "MONSTER_SAY", "MONSTER_EMOTE", "MONSTER_YELL", "MONSTER_WHISPER", "MONSTER_BOSS_EMOTE", "MONSTER_BOSS_WHISPER" }
+    -- wotlk: achievements would otherwise not show up in any window
+    for _, group in pairs({ "ACHIEVEMENT", "GUILD_ACHIEVEMENT" }) do
+      if ChatTypeGroup[group] then table.insert(normalg, group) end
+    end
+
     for _,group in pairs(normalg) do
       ChatFrame_AddMessageGroup(ChatFrame1, group)
     end
@@ -586,12 +591,20 @@ pfUI:RegisterModule("chat", "vanilla:tbc", function ()
   end
 
   for i=1, NUM_CHAT_WINDOWS do
-    _G["ChatFrame" .. i .. "UpButton"]:Hide()
-    _G["ChatFrame" .. i .. "UpButton"].Show = function() return end
-    _G["ChatFrame" .. i .. "DownButton"]:Hide()
-    _G["ChatFrame" .. i .. "DownButton"].Show = function() return end
-    _G["ChatFrame" .. i .. "BottomButton"]:Hide()
-    _G["ChatFrame" .. i .. "BottomButton"].Show = function() return end
+    -- the scroll buttons moved into a "ButtonFrame" child in 3.x
+    local buttonframe = _G["ChatFrame" .. i .. "ButtonFrame"]
+    if buttonframe then
+      buttonframe:Hide()
+      buttonframe.Show = function() return end
+    end
+
+    for _, button in pairs({ "UpButton", "DownButton", "BottomButton" }) do
+      local scrollbutton = _G["ChatFrame" .. i .. button] or _G["ChatFrame" .. i .. "ButtonFrame" .. button]
+      if scrollbutton then
+        scrollbutton:Hide()
+        scrollbutton.Show = function() return end
+      end
+    end
     _G["ChatFrame" .. i .. "Tab"]._SetAlpha = _G["ChatFrame" .. i .. "Tab"].SetAlpha
     _G["ChatFrame" .. i .. "Tab"].SetAlpha = SkipFading
   end
@@ -643,17 +656,33 @@ pfUI:RegisterModule("chat", "vanilla:tbc", function ()
   end)
 
 
-  ChatFrameEditBox:SetParent(pfUI.chat.editbox)
-  ChatFrameEditBox:SetAllPoints(pfUI.chat.editbox)
-  CreateBackdrop(ChatFrameEditBox, default_border)
-
-  for i,v in ipairs({ChatFrameEditBox:GetRegions()}) do
-    if i==6 or i==7 or i==8 then v:Hide() end
-    if v.SetFont then
-      v:SetFont(pfUI.font_default, C.global.font_size + 1, "OUTLINE")
+  -- vanilla/tbc have a single global edit box, 3.x has one per chat window
+  -- (ChatFrameNEditBox). Only the active one is shown, so style them all.
+  local legacyeditbox = rawget(_G, "ChatFrameEditBox")
+  local editboxes = {}
+  if legacyeditbox then
+    editboxes[1] = legacyeditbox
+  else
+    for i=1, NUM_CHAT_WINDOWS do
+      editboxes[i] = _G["ChatFrame" .. i .. "EditBox"]
     end
   end
-  ChatFrameEditBox:SetAltArrowKeyMode(false)
+
+  for _, editbox in pairs(editboxes) do
+    editbox:SetParent(pfUI.chat.editbox)
+    editbox:SetAllPoints(pfUI.chat.editbox)
+    CreateBackdrop(editbox, default_border)
+
+    for i,v in ipairs({editbox:GetRegions()}) do
+      -- WOTLK-CHECK: region order differs in 3.x, hide all border textures
+      if legacyeditbox and (i==6 or i==7 or i==8) then v:Hide() end
+      if not legacyeditbox and v.GetObjectType and v:GetObjectType() == "Texture" then v:Hide() end
+      if v.SetFont then
+        v:SetFont(pfUI.font_default, C.global.font_size + 1, "OUTLINE")
+      end
+    end
+    editbox:SetAltArrowKeyMode(false)
+  end
 
   if C.chat.text.mouseover == "1" then
     for i=1, NUM_CHAT_WINDOWS do

@@ -183,3 +183,29 @@ end
 
 -- PLAYER_AURAS_CHANGED was replaced by UNIT_AURA (arg1 == "player") in 3.0
 PLAYER_AURA_EVENT = "UNIT_AURA"
+
+--[[ Chat edit box ]]--
+-- vanilla/tbc have one global ChatFrameEditBox, 3.x has one edit box per chat
+-- window. Modules that only query or insert text work through this proxy,
+-- which forwards every call to the currently active edit box (or the first one).
+-- WOTLK-CHECK: SetScript/GetScript/AddHistoryLine hit the active box only.
+local function ActiveEditBox()
+  return (_G.ChatEdit_GetActiveWindow and _G.ChatEdit_GetActiveWindow()) or _G.ChatFrame1EditBox
+end
+
+ChatFrameEditBox = setmetatable({}, { __index = function(_, key)
+  local editbox = ActiveEditBox()
+  local value = editbox[key]
+  if type(value) == "function" then
+    return function(_, ...) return value(editbox, ...) end
+  end
+  return value
+end })
+
+ChatFrameEditBoxLanguage = _G.ChatFrame1EditBoxLanguage
+
+-- 3.x added a leading "self" argument (menu callback) to FCF_SetChatWindowFontSize,
+-- keep the (chatFrame, fontSize) signature of vanilla/tbc.
+function FCF_SetChatWindowFontSize(chatFrame, fontSize)
+  return _G.FCF_SetChatWindowFontSize(nil, chatFrame, fontSize)
+end
