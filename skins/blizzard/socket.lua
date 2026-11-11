@@ -1,4 +1,4 @@
-pfUI:RegisterSkin("Item Socketing", "tbc", function ()
+pfUI:RegisterSkin("Item Socketing", "tbc:wotlk", function ()
   local rawborder, border = GetBorderSize()
   local bpad = rawborder > 1 and border - GetPerfectPixel() or GetPerfectPixel()
 
