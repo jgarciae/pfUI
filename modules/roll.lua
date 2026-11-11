@@ -1,4 +1,5 @@
-pfUI:RegisterModule("roll", "vanilla:tbc", function ()
+pfUI:RegisterModule("roll", "vanilla:tbc:wotlk", function ()
+  -- WOTLK-CHECK: GetLootRollItemInfo also returns canNeed/canGreed/canDisenchant in 3.3.5; the buttons are not disabled accordingly yet.
   pfUI.roll = CreateFrame("Frame", "pfLootRoll", UIParent)
   pfUI.roll.frames = {}
 
