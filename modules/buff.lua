@@ -1,4 +1,4 @@
-pfUI:RegisterModule("buff", "vanilla:tbc", function ()
+pfUI:RegisterModule("buff", "vanilla:tbc:wotlk", function ()
   -- Hide Blizz
   BuffFrame:Hide()
   BuffFrame:UnregisterAllEvents()
@@ -225,10 +225,12 @@ pfUI:RegisterModule("buff", "vanilla:tbc", function ()
   end
 
   pfUI.buff = CreateFrame("Frame", "pfGlobalBuffFrame", UIParent)
-  pfUI.buff:RegisterEvent("PLAYER_AURAS_CHANGED")
+  pfUI.buff:RegisterEvent(PLAYER_AURA_EVENT or "PLAYER_AURAS_CHANGED")
   pfUI.buff:RegisterEvent("UNIT_INVENTORY_CHANGED")
   pfUI.buff:RegisterEvent("UNIT_MODEL_CHANGED")
   pfUI.buff:SetScript("OnEvent", function()
+    if event == "UNIT_AURA" and arg1 ~= "player" then return end
+
     if C.buffs.weapons == "1" then
       local mh, mhtime, mhcharge, oh, ohtime, ohcharge = GetWeaponEnchantInfo()
       pfUI.buff.wepbuffs.count = (mh and 1 or 0) + (oh and 1 or 0)

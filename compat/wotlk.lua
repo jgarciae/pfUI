@@ -109,3 +109,65 @@ UnitReactionColor = _G.UnitReactionColor or {
   { r = 0.0, g = 1.0, b = 0.0 },
   { r = 0.0, g = 1.0, b = 0.0 },
 }
+
+--[[ Player aura API ]]--
+-- GetPlayerBuff and friends are gone from the 3.x FrameXML (Blizzard uses
+-- UnitAura). Emulate the TBC interface on top of UnitAura so buff/buffwatch
+-- keep working. The "buff id" encodes the filter: 1..n for buffs, 1000+n for
+-- debuffs, -1 when there is no such aura.
+-- WOTLK-CHECK: GetPlayerBuff may still exist natively in 3.3.5; these wrappers
+-- shadow it inside the pfUI environment only.
+local function DecodeBuffID(bid)
+  if bid >= 1000 then return bid - 1000, "HARMFUL" end
+  return bid, "HELPFUL"
+end
+
+function GetPlayerBuff(index, filter)
+  local name, _, _, _, _, duration = _G.UnitAura("player", index, filter)
+  if not name then return -1 end
+  local bid = (filter and strfind(filter, "HARMFUL")) and (1000 + index) or index
+  return bid, (duration == 0 and 1 or nil)
+end
+
+function GetPlayerBuffTexture(bid)
+  if not bid or bid < 0 then return end
+  local index, filter = DecodeBuffID(bid)
+  local _, _, icon = _G.UnitAura("player", index, filter)
+  return icon
+end
+
+function GetPlayerBuffTimeLeft(bid)
+  if not bid or bid < 0 then return 0 end
+  local index, filter = DecodeBuffID(bid)
+  local _, _, _, _, _, _, expiration = _G.UnitAura("player", index, filter)
+  return (expiration and expiration > 0) and (expiration - GetTime()) or 0
+end
+
+function GetPlayerBuffApplications(bid)
+  if not bid or bid < 0 then return 0 end
+  local index, filter = DecodeBuffID(bid)
+  local _, _, _, count = _G.UnitAura("player", index, filter)
+  return count or 0
+end
+
+function GetPlayerBuffDispelType(bid)
+  if not bid or bid < 0 then return end
+  local index, filter = DecodeBuffID(bid)
+  local _, _, _, _, dtype = _G.UnitAura("player", index, filter)
+  return dtype
+end
+
+function CancelPlayerBuff(bid)
+  if not bid or bid < 0 then return end
+  local index, filter = DecodeBuffID(bid)
+  _G.CancelUnitBuff("player", index, filter)
+end
+
+getmetatable(_G.GameTooltip).__index.SetPlayerBuff = function(self, bid)
+  if not bid or bid < 0 then return end
+  local index, filter = DecodeBuffID(bid)
+  self:SetUnitAura("player", index, filter)
+end
+
+-- PLAYER_AURAS_CHANGED was replaced by UNIT_AURA (arg1 == "player") in 3.0
+PLAYER_AURA_EVENT = "UNIT_AURA"
