@@ -422,5 +422,12 @@ function pfUI.SetupCVars()
   COMBAT_TEXT_SHOW_MANA = "1"
   COMBAT_TEXT_FLOAT_MODE = "1"
   COMBAT_TEXT_SHOW_HONOR_GAINED = "1"
+
+  -- 3.x restores the globals above from cvars on login, persist them
+  if pfUI.env.UVAR_CVARS then
+    for uvar, cvar in pairs(pfUI.env.UVAR_CVARS) do
+      if _G[uvar] then SetCVar(cvar, _G[uvar]) end
+    end
+  end
   UIParentLoadAddOn("Blizzard_CombatText")
 end
