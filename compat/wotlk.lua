@@ -25,10 +25,14 @@ MICRO_BUTTONS = {
   'HelpMicroButton',
 }
 
--- WOTLK-CHECK: 3.3 nameplates are Frames with the same region/child layout as
--- TBC, but with a native castbar. Placeholder until the wotlk-nameplates rewrite.
-NAMEPLATE_OBJECTORDER = { "border", "castborder", "casticon", "glow", "name", "level", "levelicon", "raidicon" }
+-- WOTLK-CHECK: 3.x nameplates are named "NamePlateN" frames. Region order of the
+-- plate (see modules/nameplates.lua): threat glow, health border, mouseover
+-- overlay, name, level, boss icon, raid icon, elite icon. The castbar is native
+-- and mirrored by the module.
+NAMEPLATE_OBJECTORDER = { "threat", "border", "glow", "name", "level", "levelicon", "raidicon", "elite" }
 NAMEPLATE_FRAMETYPE = "Frame"
+NAMEPLATE_BORDER_TEXTURE = "Interface\\TargetingFrame\\UI-TargetingFrame-Flash"
+NAMEPLATE_NATIVE_CASTBAR = true
 
 MINIMAP_TRACKING_FRAME = _G.MiniMapTracking
 
