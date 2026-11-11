@@ -41,7 +41,7 @@ local spells = {
 
 -- use native IsSpellInRange checker for tbc and skip
 -- the whole targeting approach that is required for vanilla
-if pfUI.expansion == "tbc" then
+if pfUI.expansion ~= "vanilla" then
   local spell
   librange:RegisterEvent("LEARNED_SPELL_IN_TAB")
   librange:RegisterEvent("PLAYER_ENTERING_WORLD")
