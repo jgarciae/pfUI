@@ -500,6 +500,8 @@ libpredict.sender:SetScript("OnEvent", function()
     end
   elseif event == "COMBAT_LOG_EVENT_UNFILTERED" and arg2 == "SPELL_HEAL" and arg4 == player then -- tbc
     local spell, heal, crit = arg10, arg12, arg13
+    -- WOTLK-CHECK: 3.x moves "critical" further back (see compat)
+    if COMBATLOG_HEAL_CRIT_ARG then crit = _G[COMBATLOG_HEAL_CRIT_ARG] end
     if spell and heal and crit then
       if spell == spell_queue[1] then UpdateCache(spell_queue[2], heal, true) end
     elseif spell and heal then
