@@ -51,7 +51,7 @@ local function BuffOnUpdate()
 end
 
 local function TargetBuffOnUpdate()
-  local name, rank, icon, count, duration, timeleft = (UnitBuffTimed or _G.UnitBuff)("target", this.id)
+  local name, rank, icon, count, duration, timeleft = _G.UnitBuff("target", this.id)
   if duration and timeleft then
     CooldownFrame_SetTimer(this.cd, GetTime() + timeleft - duration, duration, 1)
   else
@@ -794,7 +794,8 @@ function pfUI.uf:UpdateConfig()
       f.buffs[i]:SetWidth(f.config.buffsize)
       f.buffs[i]:SetHeight(f.config.buffsize)
 
-      if f:GetName() == "pfPlayer" then
+      -- UnitBuffTimed (3.x) provides exact timers, set on aura events in RefreshUnit
+      if f:GetName() == "pfPlayer" and not UnitBuffTimed then
         f.buffs[i]:SetScript("OnUpdate", BuffOnUpdate)
       elseif f:GetName() == "pfTarget" and pfUI.expansion == "tbc" then
         f.buffs[i]:SetScript("OnUpdate", TargetBuffOnUpdate)
@@ -847,7 +848,7 @@ function pfUI.uf:UpdateConfig()
       f.debuffs[i]:SetHeight(f.config.debuffsize)
       f.debuffs[i]:SetNormalTexture(nil)
 
-      if f:GetName() == "pfPlayer" then
+      if f:GetName() == "pfPlayer" and not UnitDebuffTimed then
         f.debuffs[i]:SetScript("OnUpdate", DebuffOnUpdate)
       end
 
@@ -1542,6 +1543,15 @@ function pfUI.uf:RefreshUnit(unit, component)
       if texture then
         unit.buffs[i]:Show()
 
+        if UnitBuffTimed then
+          local _, _, _, _, duration, timeleft = UnitBuffTimed(unitstr, i)
+          if duration and timeleft then
+            CooldownFrame_SetTimer(unit.buffs[i].cd, GetTime() + timeleft - duration, duration, 1)
+          else
+            CooldownFrame_SetTimer(unit.buffs[i].cd, 0, 0, 0)
+          end
+        end
+
         if stacks > 1 then
           unit.buffs[i].stacks:SetText(stacks)
         else
@@ -1629,7 +1639,14 @@ function pfUI.uf:RefreshUnit(unit, component)
       if texture then
         unit.debuffs[i]:Show()
 
-        if unit:GetName() == "pfPlayer" then
+        if unit:GetName() == "pfPlayer" and UnitDebuffTimed then
+          local _, _, _, _, _, duration, timeleft = UnitDebuffTimed("player", i)
+          if duration and timeleft then
+            CooldownFrame_SetTimer(unit.debuffs[i].cd, GetTime() + timeleft - duration, duration, 1)
+          else
+            CooldownFrame_SetTimer(unit.debuffs[i].cd, 0, 0, 0)
+          end
+        elseif unit:GetName() == "pfPlayer" then
           local timeleft = GetPlayerBuffTimeLeft(GetPlayerBuff(PLAYER_BUFF_START_ID+unit.debuffs[i].id, "HARMFUL"),"HARMFUL")
           CooldownFrame_SetTimer(unit.debuffs[i].cd, GetTime(), timeleft, 1)
         elseif libdebuff and selfdebuff == "1" then
