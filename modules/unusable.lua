@@ -48,11 +48,11 @@ pfUI:RegisterModule("unusable", "vanilla:tbc:wotlk", function ()
   end
 
   -- update on bank frame itemlock updates
-  local HookBankFrameItemButton_UpdateLock = BankFrameItemButton_UpdateLock
-  _G.BankFrameItemButton_UpdateLock = function(button)
-    -- 3.x passes the button, older clients rely on the global "this"
+  -- 3.x renamed the function to ...UpdateLocked and passes the button,
+  -- older clients rely on the global "this"
+  local lockfunc = _G.BankFrameItemButton_UpdateLocked and "BankFrameItemButton_UpdateLocked" or "BankFrameItemButton_UpdateLock"
+  hooksecurefunc(lockfunc, function(button)
     local button = button or this
-    HookBankFrameItemButton_UpdateLock(button)
     pfUI.unusable:UpdateSlot(-1, button:GetID())
-  end
+  end)
 end)
