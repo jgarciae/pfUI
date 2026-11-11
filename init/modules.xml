@@ -70,6 +70,7 @@
   <Include file="..\modules\energytick.lua"/>
   <Include file="..\modules\totems.lua"/>
   <Include file="..\modules\runes.lua"/>
+  <Include file="..\modules\multicast.lua"/>
   <Include file="..\modules\vehicle.lua"/>
   <Include file="..\modules\macrotweak.lua"/>
   <Include file="..\modules\turtle-wow.lua"/>
