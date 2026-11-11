@@ -1703,10 +1703,13 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc:wotlk", function ()
 
       for name, bar in pairs(bindwraps) do
         for i=1,12 do
-          local key = GetBindingKey(format(name, i))
+          local key1, key2 = GetBindingKey(format(name, i))
           local button = bars[bar][i]
-          if key and button then
-            SetOverrideBindingClick(button, false, key, button:GetName(), 'LeftButton')
+          if button then
+            -- drop overrides of keys that got unbound or moved meanwhile
+            ClearOverrideBindings(button)
+            if key1 then SetOverrideBindingClick(button, false, key1, button:GetName(), 'LeftButton') end
+            if key2 then SetOverrideBindingClick(button, false, key2, button:GetName(), 'LeftButton') end
           end
         end
       end
