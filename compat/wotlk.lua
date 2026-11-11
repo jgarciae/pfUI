@@ -97,3 +97,15 @@ end
 -- (ClearTutorials is a client API, TutorialFrame_HideAllAlerts is gone).
 _G.TutorialFrame_HideAllAlerts = _G.TutorialFrame_HideAllAlerts or function() end
 _G.ClearTutorials = _G.ClearTutorials or function() end
+
+-- UnitReactionColor is no longer a Blizzard global in 3.3.5; keep the vanilla values
+UnitReactionColor = _G.UnitReactionColor or {
+  { r = 1.0, g = 0.0, b = 0.0 },
+  { r = 1.0, g = 0.0, b = 0.0 },
+  { r = 1.0, g = 0.5, b = 0.0 },
+  { r = 1.0, g = 1.0, b = 0.0 },
+  { r = 0.0, g = 1.0, b = 0.0 },
+  { r = 0.0, g = 1.0, b = 0.0 },
+  { r = 0.0, g = 1.0, b = 0.0 },
+  { r = 0.0, g = 1.0, b = 0.0 },
+}
