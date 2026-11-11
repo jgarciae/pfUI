@@ -6,18 +6,30 @@ pfUI:RegisterSkin("Calendar", "wotlk", function ()
     CreateBackdropShadow(CalendarFrame)
     EnableMovable(CalendarFrame)
 
-    if CalendarCloseButton then
-      SkinCloseButton(CalendarCloseButton, CalendarFrame.backdrop, -6, -6)
+    SkinCloseButton(CalendarCloseButton, CalendarFrame.backdrop, -6, -6)
+
+    -- event and dialog frames draw a dialog border backdrop, replace it
+    for _, name in pairs({ "CalendarViewHolidayFrame", "CalendarViewRaidFrame",
+      "CalendarViewEventFrame", "CalendarCreateEventFrame", "CalendarMassInviteFrame",
+      "CalendarEventPickerFrame", "CalendarTexturePickerFrame" }) do
+      local frame = _G[name]
+      StripTextures(frame)
+      CreateBackdrop(frame, nil, true, .75)
+      CreateBackdropShadow(frame)
     end
 
-    for _, name in pairs({ "CalendarViewEventFrame", "CalendarViewHolidayFrame",
-      "CalendarCreateEventFrame", "CalendarMassInviteFrame", "CalendarEventPickerFrame",
-      "CalendarTexturePickerFrame" }) do
-      local frame = _G[name]
-      if frame then
-        StripTextures(frame)
-        CreateBackdrop(frame, nil, nil, .75)
-      end
+    for _, name in pairs({ "CalendarViewHolidayCloseButton", "CalendarViewRaidCloseButton",
+      "CalendarViewEventCloseButton", "CalendarCreateEventCloseButton", "CalendarMassInviteCloseButton" }) do
+      SkinCloseButton(_G[name], _G[name]:GetParent(), -6, -6)
+    end
+
+    for _, name in pairs({ "CalendarViewEventAcceptButton", "CalendarViewEventTentativeButton",
+      "CalendarViewEventDeclineButton", "CalendarViewEventRemoveButton",
+      "CalendarCreateEventInviteButton", "CalendarCreateEventMassInviteButton",
+      "CalendarCreateEventRaidInviteButton", "CalendarCreateEventCreateButton",
+      "CalendarMassInviteGuildAcceptButton", "CalendarEventPickerCloseButton",
+      "CalendarTexturePickerCancelButton", "CalendarTexturePickerAcceptButton" }) do
+      SkinButton(_G[name])
     end
   end)
 end)

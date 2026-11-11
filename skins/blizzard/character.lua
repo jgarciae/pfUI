@@ -3,7 +3,10 @@ pfUI:RegisterSkin("Character", "vanilla:tbc:wotlk", function ()
   local bpad = rawborder > 1 and border - GetPerfectPixel() or GetPerfectPixel()
 
   -- Compatibility
-  if PlayerTitleDropDown then -- tbc, wotlk
+  -- WOTLK-CHECK: 3.x replaced PlayerTitleDropDown by PlayerTitleFrame, so the
+  -- title and stat dropdowns are not skinned there (vanilla branch below only
+  -- touches the unused HonorFrame)
+  if PlayerTitleDropDown then -- tbc
     -- Character Tab
     SkinDropDown(PlayerTitleDropDown)
     PlayerTitleDropDown:SetPoint("TOP", CharacterLevelText, "BOTTOM", 0, -2)
@@ -81,9 +84,13 @@ pfUI:RegisterSkin("Character", "vanilla:tbc:wotlk", function ()
       "AmmoSlot"
     }
 
+    -- 3.x: PetTab_Update is gone, the pet tab is also shown for companions
+    local pettab_func = PetTab_Update and "PetTab_Update" or "PetPaperDollFrame_UpdateIsAvailable"
     local function RefreshPetPosition()
+      local haspet
+      if PetTab_Update then haspet = HasPetUI() else haspet = CharacterFrameTab2:IsShown() end
       CharacterFrameTab3:ClearAllPoints()
-      CharacterFrameTab3:SetPoint("LEFT", HasPetUI() and CharacterFrameTab2 or CharacterFrameTab1, "RIGHT", border*2 + 1, 0)
+      CharacterFrameTab3:SetPoint("LEFT", haspet and CharacterFrameTab2 or CharacterFrameTab1, "RIGHT", border*2 + 1, 0)
     end
 
     local function RefreshCharacterSlot(slot)
@@ -136,13 +143,15 @@ pfUI:RegisterSkin("Character", "vanilla:tbc:wotlk", function ()
       RefreshPetPosition()
 
       if not this.hooked then
-        hooksecurefunc("PaperDollItemSlotButton_Update", function()
+        -- 3.x passes the button, older clients use "this"
+        hooksecurefunc("PaperDollItemSlotButton_Update", function(button)
+          local button = button or this
           -- update only character slots!
-          if string.find(this:GetName(), "^Character.-Slot$") then
-            RefreshCharacterSlot(this)
+          if string.find(button:GetName(), "^Character.-Slot$") then
+            RefreshCharacterSlot(button)
           end
         end)
-        hooksecurefunc("PetTab_Update", RefreshPetPosition)
+        hooksecurefunc(pettab_func, RefreshPetPosition)
         this.hooked = true
       end
     end)
@@ -201,11 +210,14 @@ pfUI:RegisterSkin("Character", "vanilla:tbc:wotlk", function ()
     PetPaperDollFrameExpBar:ClearAllPoints()
     PetPaperDollFrameExpBar:SetPoint("BOTTOM", PetModelFrame, "BOTTOM", 0, -120)
 
-    PetTrainingPointLabel:ClearAllPoints()
-    PetTrainingPointLabel:SetPoint("TOPLEFT", PetArmorFrame, "BOTTOMLEFT", 0, -16)
+    -- pet training points were removed in 3.x
+    if PetTrainingPointLabel then
+      PetTrainingPointLabel:ClearAllPoints()
+      PetTrainingPointLabel:SetPoint("TOPLEFT", PetArmorFrame, "BOTTOMLEFT", 0, -16)
 
-    PetTrainingPointText:ClearAllPoints()
-    PetTrainingPointText:SetPoint("TOPRIGHT", PetArmorFrame, "BOTTOMRIGHT", 0, -16)
+      PetTrainingPointText:ClearAllPoints()
+      PetTrainingPointText:SetPoint("TOPRIGHT", PetArmorFrame, "BOTTOMRIGHT", 0, -16)
+    end
 
     PetPaperDollPetInfo:ClearAllPoints()
     PetPaperDollPetInfo:SetPoint("TOPLEFT", PetModelFrame, "TOPLEFT")
@@ -231,22 +243,34 @@ pfUI:RegisterSkin("Character", "vanilla:tbc:wotlk", function ()
 
     for i = 1, NUM_FACTIONS_DISPLAYED do
       local bar = _G["ReputationBar" .. i]
-      StripTextures(bar)
-      CreateBackdrop(bar)
-      bar:SetStatusBarTexture(pfUI.media["img:bar"])
+      local statusbar = _G["ReputationBar" .. i .. "ReputationBar"]
 
-      local war = _G["ReputationBar"..i.."AtWarCheck"]
-      StripTextures(war)
-      war:SetWidth(13)
-      war:SetHeight(13)
-      war:ClearAllPoints()
-      war:SetPoint("LEFT", bar.backdrop, "RIGHT", 6, 0)
-      war.icon = war:CreateTexture(nil, "OVERLAY")
-      war.icon:SetPoint("LEFT", -3, -8)
-      war.icon:SetTexture("Interface\\Buttons\\UI-CheckBox-SwordCheck")
+      if statusbar then
+        -- 3.x: each row is a button that holds the status bar and the
+        -- expand/collapse button, the at war state is set in the details frame
+        StripTextures(bar)
+        StripTextures(statusbar)
+        CreateBackdrop(statusbar)
+        statusbar:SetStatusBarTexture(pfUI.media["img:bar"])
 
-      -- 3.x renamed the header buttons to ReputationBarNExpandOrCollapseButton
-      SkinCollapseButton(_G["ReputationHeader"..i] or _G["ReputationBar"..i.."ExpandOrCollapseButton"])
+        SkinCollapseButton(_G["ReputationBar"..i.."ExpandOrCollapseButton"])
+      else
+        StripTextures(bar)
+        CreateBackdrop(bar)
+        bar:SetStatusBarTexture(pfUI.media["img:bar"])
+
+        local war = _G["ReputationBar"..i.."AtWarCheck"]
+        StripTextures(war)
+        war:SetWidth(13)
+        war:SetHeight(13)
+        war:ClearAllPoints()
+        war:SetPoint("LEFT", bar.backdrop, "RIGHT", 6, 0)
+        war.icon = war:CreateTexture(nil, "OVERLAY")
+        war.icon:SetPoint("LEFT", -3, -8)
+        war.icon:SetTexture("Interface\\Buttons\\UI-CheckBox-SwordCheck")
+
+        SkinCollapseButton(_G["ReputationHeader"..i])
+      end
     end
 
     StripTextures(ReputationListScrollFrame)
@@ -321,15 +345,19 @@ pfUI:RegisterSkin("Character", "vanilla:tbc:wotlk", function ()
     SkillDetailStatusBarUnlearnButton:SetNormalTexture("Interface\\Buttons\\UI-GroupLoot-Pass-Up")
   end
   -- Currency Tab (3.x, Blizzard_TokenUI is loaded on demand)
-  HookAddonOrVariable("Blizzard_TokenUI", function()
-    StripTextures(TokenFrame)
-    StripTextures(TokenFrameContainer)
-    SkinScrollbar(TokenFrameContainerScrollBar)
+  -- only wait for the addon on clients that have currencies
+  if GetCurrencyListSize then
+    HookAddonOrVariable("Blizzard_TokenUI", function()
+      StripTextures(TokenFrame)
+      StripTextures(TokenFrameContainer)
+      StripTextures(TokenFrameContainerScrollBar)
+      SkinScrollbar(TokenFrameContainerScrollBar)
 
-    StripTextures(TokenFramePopup)
-    CreateBackdrop(TokenFramePopup, nil, nil, .75)
-    SkinCheckbox(TokenFramePopupInactiveCheckBox)
-    SkinCheckbox(TokenFramePopupBackpackCheckBox)
-    SkinCloseButton(TokenFramePopupCloseButton, TokenFramePopup.backdrop, -6, -6)
-  end)
+      StripTextures(TokenFramePopup)
+      CreateBackdrop(TokenFramePopup, nil, nil, .75)
+      SkinCheckbox(TokenFramePopupInactiveCheckBox)
+      SkinCheckbox(TokenFramePopupBackpackCheckBox)
+      SkinCloseButton(TokenFramePopupCloseButton, TokenFramePopup.backdrop, -6, -6)
+    end)
+  end
 end)

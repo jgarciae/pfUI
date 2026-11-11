@@ -309,6 +309,8 @@ pfUI:RegisterModule("chat", "vanilla:tbc:wotlk", function ()
     end
 
     ChatFrameMenuButton:Hide()
+    -- 3.x: battle.net friends button sits on top of the chat menu button
+    if FriendsMicroButton then FriendsMicroButton:Hide() end
     ChatMenu:SetClampedToScreen(true)
     CreateBackdrop(ChatMenu)
     CreateBackdrop(EmoteMenu)
@@ -687,6 +689,27 @@ pfUI:RegisterModule("chat", "vanilla:tbc:wotlk", function ()
       end
     end
     editbox:SetAltArrowKeyMode(false)
+  end
+
+  -- 3.x: the "im" chat style keeps the last used edit box shown at 35% alpha
+  -- (ChatEdit_SetDeactivated), hide it like the "classic" style does.
+  if not legacyeditbox and ChatEdit_SetLastActiveWindow then
+    local function HideInactive(editbox)
+      if editbox and editbox ~= ACTIVE_CHAT_EDIT_BOX and editbox:IsShown() then
+        editbox:Hide()
+      end
+    end
+
+    hooksecurefunc("ChatEdit_DeactivateChat", HideInactive)
+    hooksecurefunc("ChatEdit_SetLastActiveWindow", HideInactive)
+  end
+
+  -- 3.x: the chat style option (applied on VARIABLES_LOADED) reparents the
+  -- default edit box to UIParent or ChatFrame1, move it back.
+  if not legacyeditbox and InterfaceOptionsSocialPanelChatStyle_SetChatStyle then
+    hooksecurefunc("InterfaceOptionsSocialPanelChatStyle_SetChatStyle", function()
+      DEFAULT_CHAT_FRAME.editBox:SetParent(pfUI.chat.editbox)
+    end)
   end
 
   if C.chat.text.mouseover == "1" then
