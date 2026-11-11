@@ -273,12 +273,22 @@ end
 
 function pfUI:LoadModule(m)
   setfenv(pfUI.module[m], pfUI:GetEnvironment())
-  pfUI.module[m]()
+  if pfUI.expansion == "wotlk" then
+    -- WOTLK-CHECK: keep loading the remaining modules when one fails, the
+    -- error is still reported to the error handler (BugGrabber/BugSack)
+    xpcall(pfUI.module[m], geterrorhandler())
+  else
+    pfUI.module[m]()
+  end
 end
 
 function pfUI:LoadSkin(s)
   setfenv(pfUI.skin[s], pfUI:GetEnvironment())
-  pfUI.skin[s]()
+  if pfUI.expansion == "wotlk" then
+    xpcall(pfUI.skin[s], geterrorhandler())
+  else
+    pfUI.skin[s]()
+  end
 end
 
 pfUI:SetScript("OnEvent", function()
