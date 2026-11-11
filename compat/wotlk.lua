@@ -80,6 +80,19 @@ function UnitBuffTimed(unitstr, i)
   return name, rank, icon, count, duration, timeleft
 end
 
+-- debuff counterpart of UnitBuffTimed (keeps the dispel type), used for
+-- the player debuff timers in api/unitframes.lua
+function UnitDebuffTimed(unitstr, i)
+  local name, rank, icon, count, dtype, duration, expiration = _G.UnitDebuff(unitstr, i)
+  if not name then return end
+  if duration == 0 then duration = nil end
+  local timeleft = (expiration and expiration > 0) and (expiration - GetTime()) or nil
+  return name, rank, icon, count, dtype, duration, timeleft
+end
+
+-- 3.x ships a Blizzard focus frame (FocusFrame.xml), hidden by modules/focus.lua
+BLIZZARD_FOCUS_FRAME = _G.FocusFrame
+
 function UnitDebuff(unitstr, i)
   local name, rank, texture, stacks, dtype = _G.UnitDebuff(unitstr, i)
   return texture, stacks, dtype
