@@ -379,18 +379,20 @@ pfUI:RegisterModule("nameplates", "vanilla:tbc:wotlk", function ()
     DisableObject(nameplate.original.healthbar)
     DisableObject(nameplate.original.castbar)
 
-    -- 3.x: the native castbar (with border, shield and icon regions) is part of
-    -- the plate and keeps showing its own artwork; hide it with alpha instead
-    -- and read its values later on. The icon is the 4th castbar region.
-    -- WOTLK-CHECK: region order of the castbar child
+    -- 3.x: the native castbar keeps being driven by the client; hide it with
+    -- alpha and read its values later on. Its border, shield and icon are
+    -- regions of the plate itself (see NAMEPLATE_OBJECTORDER).
     if NAMEPLATE_NATIVE_CASTBAR and nameplate.original.castbar then
       nameplate.original.castbar:SetAlpha(0)
-      nameplate.original.casticon = select(4, nameplate.original.castbar:GetRegions())
     end
 
     for i, object in pairs({parent:GetRegions()}) do
       if NAMEPLATE_OBJECTORDER[i] and NAMEPLATE_OBJECTORDER[i] == "raidicon" then
         nameplate[NAMEPLATE_OBJECTORDER[i]] = object
+      elseif NAMEPLATE_NATIVE_CASTBAR and NAMEPLATE_OBJECTORDER[i] == "casticon" then
+        -- keep the texture readable for the castbar mirror
+        nameplate.original.casticon = object
+        object:SetAlpha(0)
       elseif NAMEPLATE_OBJECTORDER[i] then
         nameplate.original[NAMEPLATE_OBJECTORDER[i]] = object
         DisableObject(object)
@@ -1042,8 +1044,9 @@ pfUI:RegisterModule("nameplates", "vanilla:tbc:wotlk", function ()
     if C.nameplates["showcastbar"] == "1" and ( C.nameplates["targetcastbar"] == "0" or target ) then
       local channel, cast, nameSubtext, text, texture, startTime, endTime, isTradeSkill
 
-      if NAMEPLATE_NATIVE_CASTBAR then
+      if NAMEPLATE_NATIVE_CASTBAR and not target then
         -- 3.x: mirror the native castbar of the plate, units can't be queried by name
+        -- (the target still goes through UnitCastingInfo below for the spell name)
         local native = original.castbar
         if native and native:IsShown() then
           local min, max = native:GetMinMaxValues()

@@ -25,11 +25,12 @@ MICRO_BUTTONS = {
   'HelpMicroButton',
 }
 
--- WOTLK-CHECK: 3.x nameplates are named "NamePlateN" frames. Region order of the
--- plate (see modules/nameplates.lua): threat glow, health border, mouseover
--- overlay, name, level, boss icon, raid icon, elite icon. The castbar is native
--- and mirrored by the module.
-NAMEPLATE_OBJECTORDER = { "threat", "border", "glow", "name", "level", "levelicon", "raidicon", "elite" }
+-- 3.3.5 nameplates are unnamed WorldFrame children (children: healthbar, castbar).
+-- Region order of the plate: threat glow, health border, cast border, cast
+-- shield, spell icon, mouseover highlight, name, level, boss icon, raid icon,
+-- elite icon (the cast regions only moved into the castbar in 4.x).
+-- The castbar is native and mirrored by the module.
+NAMEPLATE_OBJECTORDER = { "threat", "border", "castborder", "castshield", "casticon", "glow", "name", "level", "levelicon", "raidicon", "elite" }
 NAMEPLATE_FRAMETYPE = "Frame"
 NAMEPLATE_BORDER_TEXTURE = "Interface\\TargetingFrame\\UI-TargetingFrame-Flash"
 NAMEPLATE_NATIVE_CASTBAR = true
