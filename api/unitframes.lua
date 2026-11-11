@@ -1157,7 +1157,11 @@ function pfUI.uf:RightClickAction(unit)
     local name = this.lastUnit
     local unitstr = this.label .. this.id
     FriendsDropDown.displayMode = "MENU"
-    FriendsDropDown.initialize = function() UnitPopup_ShowMenu(_G[UIDROPDOWNMENU_OPEN_MENU], "PARTY", unitstr, name, id) end
+    FriendsDropDown.initialize = function(frame)
+      -- 3.x passes the dropdown frame, vanilla/tbc expose its name in UIDROPDOWNMENU_OPEN_MENU
+      local menu = type(frame) == "table" and frame or _G[UIDROPDOWNMENU_OPEN_MENU]
+      UnitPopup_ShowMenu(menu, "PARTY", unitstr, name, id)
+    end
     ToggleDropDownMenu(1, nil, FriendsDropDown, "cursor")
   end
 end
