@@ -299,6 +299,10 @@ ITEMLINK_BY_NAME = true
 -- not required and registers no events.
 UNITHEALTH_NATIVE = true
 
+-- native ~40y range check for party/raid members, used by librange when
+-- the class has no 40y heal to test with (pfUI.api.UnitInRange shadows it)
+UNITINRANGE_GROUP = _G.UnitInRange
+
 -- ManaBarColor was renamed to PowerBarColor in 3.x (numeric indices kept)
 ManaBarColor = _G.ManaBarColor or _G.PowerBarColor
 

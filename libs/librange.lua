@@ -66,7 +66,10 @@ if pfUI.expansion ~= "vanilla" then
   end)
 
   function librange:UnitInSpellRange(unit)
-    if not spell then return nil end
+    if not spell then
+      -- classes without a 40y heal fall back to the native group range check
+      return UNITINRANGE_GROUP and UNITINRANGE_GROUP(unit) and true or nil
+    end
     return IsSpellInRange(spell, unit) == 1 and true or nil
   end
 
