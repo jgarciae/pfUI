@@ -65,10 +65,13 @@ pfUI:RegisterModule("tracking", "vanilla", function ()
   pfUI.tracking.menu = CreateFrame("Frame", "pfUIDropDownMenuTracking", nil, "UIDropDownMenuTemplate")
 
   pfUI.tracking:RegisterEvent("PLAYER_ENTERING_WORLD")
-  pfUI.tracking:RegisterEvent("PLAYER_AURAS_CHANGED")
+  pfUI.tracking:RegisterEvent(PLAYER_AURA_EVENT or "PLAYER_AURAS_CHANGED")
   pfUI.tracking:RegisterEvent("SPELLS_CHANGED")
   pfUI.tracking:RegisterEvent("UPDATE_SHAPESHIFT_FORMS")
   pfUI.tracking:SetScript("OnEvent", function()
+    -- UNIT_AURA fires for every unit on 3.x
+    if event == "UNIT_AURA" and arg1 ~= "player" then return end
+
     if event == "SPELLS_CHANGED" then
       state.spells = {}
     end
