@@ -1,4 +1,4 @@
-pfUI:RegisterModule("unusable", "vanilla:tbc", function ()
+pfUI:RegisterModule("unusable", "vanilla:tbc:wotlk", function ()
   if not pfUI.bag then return end
   if C.appearance.bags.unusable ~= "1" then return end
 
@@ -49,8 +49,10 @@ pfUI:RegisterModule("unusable", "vanilla:tbc", function ()
 
   -- update on bank frame itemlock updates
   local HookBankFrameItemButton_UpdateLock = BankFrameItemButton_UpdateLock
-  _G.BankFrameItemButton_UpdateLock = function()
-    HookBankFrameItemButton_UpdateLock()
-    pfUI.unusable:UpdateSlot(-1, this:GetID())
+  _G.BankFrameItemButton_UpdateLock = function(button)
+    -- 3.x passes the button, older clients rely on the global "this"
+    local button = button or this
+    HookBankFrameItemButton_UpdateLock(button)
+    pfUI.unusable:UpdateSlot(-1, button:GetID())
   end
 end)
