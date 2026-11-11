@@ -15,34 +15,49 @@ pfUI:RegisterSkin("Gossip and Quest", "vanilla:tbc:wotlk", function ()
   do -- quest gossip
     StripTextures(QuestGreetingScrollChildFrame)
 
-    QuestTitleText:SetPoint("TOPLEFT", 10, -10)
-    QuestProgressTitleText:SetPoint("TOPLEFT", 10, -10)
+    if QuestTitleText then QuestTitleText:SetPoint("TOPLEFT", 10, -10) end
+    if QuestProgressTitleText then QuestProgressTitleText:SetPoint("TOPLEFT", 10, -10) end
 
-    StripTextures(QuestRewardItemHighlight)
-    local QuestRewardItemHighlight = CreateFrame("Frame", nil, QuestRewardScrollChildFrame)
-    local QuestRewardItemHighlightBG = QuestRewardItemHighlight:CreateTexture(nil, "OVERLAY")
-    QuestRewardItemHighlightBG:SetTexture(1,1,1,.2)
-    QuestRewardItemHighlightBG:SetAllPoints()
-
-    hooksecurefunc("QuestFrameItems_Update", function()
-      QuestRewardItemHighlight:Hide()
-    end)
-
-    hooksecurefunc("QuestRewardItem_OnClick", function()
-      if this.type == "choice" then
-        QuestRewardItemHighlight:SetAllPoints(this.backdrop)
-        QuestRewardItemHighlight:Show()
+    -- 3.x moved the item buttons into QuestInfo (QuestInfoItemN / QuestProgressItemN)
+    -- WOTLK-CHECK: item highlight hooks are skipped on 3.x, quest info layout is untested
+    local items, highlight = {}, nil
+    if QuestRewardItemHighlight then
+      for _, name in pairs({ "QuestProgressItem", "QuestDetailItem", "QuestRewardItem" }) do
+        for i = 1, 6 do table.insert(items, name .. i) end
       end
-    end)
 
-    for _, name in pairs({ "QuestProgressItem", "QuestDetailItem", "QuestRewardItem" }) do
-      for i = 1, 6 do
-        local name = name .. i
-        local item = _G[name]
-        local icon = _G[name.."IconTexture"]
-        local count = _G[name.."Count"]
-        local title = _G[name.."Name"]
+      StripTextures(QuestRewardItemHighlight)
+      highlight = CreateFrame("Frame", nil, QuestRewardScrollChildFrame)
+      local highlightbg = highlight:CreateTexture(nil, "OVERLAY")
+      highlightbg:SetTexture(1,1,1,.2)
+      highlightbg:SetAllPoints()
 
+      if QuestFrameItems_Update then
+        hooksecurefunc("QuestFrameItems_Update", function()
+          highlight:Hide()
+        end)
+      end
+
+      if QuestRewardItem_OnClick then
+        hooksecurefunc("QuestRewardItem_OnClick", function()
+          if this.type == "choice" then
+            highlight:SetAllPoints(this.backdrop)
+            highlight:Show()
+          end
+        end)
+      end
+    elseif QuestInfoItem1 then
+      for i = 1, 10 do table.insert(items, "QuestInfoItem" .. i) end
+      for i = 1, 6 do table.insert(items, "QuestProgressItem" .. i) end
+    end
+
+    for _, name in pairs(items) do
+      local item = _G[name]
+      local icon = _G[name.."IconTexture"]
+      local count = _G[name.."Count"]
+      local title = _G[name.."Name"]
+
+      if item and icon and count and title then
         local xsize = item:GetWidth() -12
         local ysize = item:GetHeight() -12
 

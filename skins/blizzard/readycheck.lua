@@ -1,5 +1,7 @@
 pfUI:RegisterSkin("Readycheck", "vanilla:tbc:wotlk", function ()
-  HookAddonOrVariable("Blizzard_RaidUI", function()
+  -- 3.x: ReadyCheckFrame lives in FrameXML (ReadyCheck.xml) and not in Blizzard_RaidUI
+  local wotlk = pfUI.expansion == "wotlk"
+  HookAddonOrVariable(wotlk and "ReadyCheckFrame" or "Blizzard_RaidUI", function()
     -- Compatibility
     local update_func
     if ReadyCheckFrame_OnUpdate then -- tbc
@@ -22,6 +24,9 @@ pfUI:RegisterSkin("Readycheck", "vanilla:tbc:wotlk", function ()
 
     ReadyCheckFrameText:ClearAllPoints()
     ReadyCheckFrameText:SetPoint("TOP", ReadyCheckFrame, "TOP", 0, -12)
+
+    -- 3.x has no timeout on ready checks, so there is no countdown bar
+    if wotlk then return end
 
     local frame = CreateFrame("Button", nil, ReadyCheckFrame)
     frame:SetPoint("TOP", ReadyCheckFrameText, "BOTTOM", 0, -6)
