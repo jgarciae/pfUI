@@ -51,7 +51,7 @@ local function BuffOnUpdate()
 end
 
 local function TargetBuffOnUpdate()
-  local name, rank, icon, count, duration, timeleft = (UnitBuffTimed or _G.UnitBuff)("target", this.id)
+  local name, rank, icon, count, duration, timeleft = _G.UnitBuff("target", this.id)
   if duration and timeleft then
     CooldownFrame_SetTimer(this.cd, GetTime() + timeleft - duration, duration, 1)
   else
@@ -166,6 +166,12 @@ end)
 
 local aggrodata = { }
 function pfUI.api.UnitHasAggro(unit)
+  -- 3.x: native threat api, 2/3 = the unit is tanking a mob
+  if UnitThreatSituation then
+    local status = UnitThreatSituation(unit)
+    return status and status > 1 and 1 or 0
+  end
+
   if aggrodata[unit] and GetTime() < aggrodata[unit].check + 1 then
     return aggrodata[unit].state
   end
@@ -788,7 +794,8 @@ function pfUI.uf:UpdateConfig()
       f.buffs[i]:SetWidth(f.config.buffsize)
       f.buffs[i]:SetHeight(f.config.buffsize)
 
-      if f:GetName() == "pfPlayer" then
+      -- UnitBuffTimed (3.x) provides exact timers, set on aura events in RefreshUnit
+      if f:GetName() == "pfPlayer" and not UnitBuffTimed then
         f.buffs[i]:SetScript("OnUpdate", BuffOnUpdate)
       elseif f:GetName() == "pfTarget" and pfUI.expansion == "tbc" then
         f.buffs[i]:SetScript("OnUpdate", TargetBuffOnUpdate)
@@ -841,7 +848,7 @@ function pfUI.uf:UpdateConfig()
       f.debuffs[i]:SetHeight(f.config.debuffsize)
       f.debuffs[i]:SetNormalTexture(nil)
 
-      if f:GetName() == "pfPlayer" then
+      if f:GetName() == "pfPlayer" and not UnitDebuffTimed then
         f.debuffs[i]:SetScript("OnUpdate", DebuffOnUpdate)
       end
 
@@ -1157,7 +1164,11 @@ function pfUI.uf:RightClickAction(unit)
     local name = this.lastUnit
     local unitstr = this.label .. this.id
     FriendsDropDown.displayMode = "MENU"
-    FriendsDropDown.initialize = function() UnitPopup_ShowMenu(_G[UIDROPDOWNMENU_OPEN_MENU], "PARTY", unitstr, name, id) end
+    FriendsDropDown.initialize = function(frame)
+      -- 3.x passes the dropdown frame, vanilla/tbc expose its name in UIDROPDOWNMENU_OPEN_MENU
+      local menu = type(frame) == "table" and frame or _G[UIDROPDOWNMENU_OPEN_MENU]
+      UnitPopup_ShowMenu(menu, "PARTY", unitstr, name, id)
+    end
     ToggleDropDownMenu(1, nil, FriendsDropDown, "cursor")
   end
 end
@@ -1532,6 +1543,15 @@ function pfUI.uf:RefreshUnit(unit, component)
       if texture then
         unit.buffs[i]:Show()
 
+        if UnitBuffTimed then
+          local _, _, _, _, duration, timeleft = UnitBuffTimed(unitstr, i)
+          if duration and timeleft then
+            CooldownFrame_SetTimer(unit.buffs[i].cd, GetTime() + timeleft - duration, duration, 1)
+          else
+            CooldownFrame_SetTimer(unit.buffs[i].cd, 0, 0, 0)
+          end
+        end
+
         if stacks > 1 then
           unit.buffs[i].stacks:SetText(stacks)
         else
@@ -1619,7 +1639,14 @@ function pfUI.uf:RefreshUnit(unit, component)
       if texture then
         unit.debuffs[i]:Show()
 
-        if unit:GetName() == "pfPlayer" then
+        if unit:GetName() == "pfPlayer" and UnitDebuffTimed then
+          local _, _, _, _, _, duration, timeleft = UnitDebuffTimed("player", i)
+          if duration and timeleft then
+            CooldownFrame_SetTimer(unit.debuffs[i].cd, GetTime() + timeleft - duration, duration, 1)
+          else
+            CooldownFrame_SetTimer(unit.debuffs[i].cd, 0, 0, 0)
+          end
+        elseif unit:GetName() == "pfPlayer" then
           local timeleft = GetPlayerBuffTimeLeft(GetPlayerBuff(PLAYER_BUFF_START_ID+unit.debuffs[i].id, "HARMFUL"),"HARMFUL")
           CooldownFrame_SetTimer(unit.debuffs[i].cd, GetTime(), timeleft, 1)
         elseif libdebuff and selfdebuff == "1" then
@@ -2001,6 +2028,9 @@ function pfUI.uf:RefreshUnit(unit, component)
       r, g, b, a = GetStringColor(focus)
     elseif utype == 3 then
       r, g, b, a = GetStringColor(energy)
+    elseif ManaBarColor[utype] then
+      -- power types without a pfUI color option (e.g runic power)
+      r, g, b = ManaBarColor[utype].r, ManaBarColor[utype].g, ManaBarColor[utype].b
     end
 
     unit.power.bar:SetStatusBarColor(r, g, b, a)

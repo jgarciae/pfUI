@@ -1,4 +1,7 @@
 pfUI:RegisterModule("energytick", "vanilla:tbc:wotlk", function ()
+  -- WOTLK-CHECK: 3.x clients show predicted (smooth) power. Verify that
+  -- UNIT_ENERGY/UNIT_MANA still arrive on the 2s server tick, otherwise the
+  -- spark restarts on every update and the module should skip 3.x.
   if not pfUI.uf or not pfUI.uf.player then return end
 
   local energytick = CreateFrame("Frame", nil, pfUI.uf.player.power.bar)

@@ -60,8 +60,9 @@ pfUI:RegisterModule("combopoints", "vanilla:tbc:wotlk", function ()
       pfUI.combopoints:DisplayNum(GetComboPoints("target"))
     end)
 
-  -- reck
-  elseif class == "PALADIN" then
+  -- reck: tracked through the old combat chat events and strings,
+  -- both are gone in 3.x (and reckoning no longer stacks there)
+  elseif class == "PALADIN" and COMBATHITCRITOTHERSELF then
     local reck = CreateFrame("Frame")
     reck:RegisterEvent("CHARACTER_POINTS_CHANGED")
     reck:RegisterEvent("PLAYER_DEAD")
