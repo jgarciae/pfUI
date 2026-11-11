@@ -1,4 +1,4 @@
-pfUI:RegisterSkin("Talents", "vanilla:tbc", function ()
+pfUI:RegisterSkin("Talents", "vanilla:tbc:wotlk", function ()
   local rawborder, border = GetBorderSize()
   local bpad = rawborder > 1 and border - GetPerfectPixel() or GetPerfectPixel()
 
@@ -23,12 +23,16 @@ pfUI:RegisterSkin("Talents", "vanilla:tbc", function ()
     EnableMovable(TALENT_FRAME)
 
     TALENT_FRAME:DisableDrawLayer("BACKGROUND")
-    _G[TALENT_FRAME_NAME.."CancelButton"]:Hide()
+    if _G[TALENT_FRAME_NAME.."CancelButton"] then _G[TALENT_FRAME_NAME.."CancelButton"]:Hide() end
 
     _G[TALENT_FRAME_NAME.."TitleText"]:ClearAllPoints()
     _G[TALENT_FRAME_NAME.."TitleText"]:SetPoint("TOP", TALENT_FRAME.backdrop, "TOP", 0, -10)
-    _G[TALENT_FRAME_NAME.."SpentPoints"]:ClearAllPoints()
-    _G[TALENT_FRAME_NAME.."SpentPoints"]:SetPoint("TOP", TALENT_FRAME.backdrop, "TOP", 0, -48)
+    -- 3.x: SpentPointsText inside the points bar
+    local spent = _G[TALENT_FRAME_NAME.."SpentPoints"] or _G[TALENT_FRAME_NAME.."SpentPointsText"]
+    if spent then
+      spent:ClearAllPoints()
+      spent:SetPoint("TOP", TALENT_FRAME.backdrop, "TOP", 0, -48)
+    end
 
     SkinCloseButton(_G[TALENT_FRAME_NAME.."CloseButton"], TALENT_FRAME.backdrop, -6, -6)
 
@@ -38,13 +42,14 @@ pfUI:RegisterSkin("Talents", "vanilla:tbc", function ()
     _G[TALENT_FRAME_NAME.."TalentPointsText"]:ClearAllPoints()
     _G[TALENT_FRAME_NAME.."TalentPointsText"]:SetPoint("BOTTOMRIGHT", TALENT_FRAME, "BOTTOMRIGHT", -65, 83)
 
-    for i = 1, MAX_NUM_TALENTS do
+    for i = 1, (MAX_NUM_TALENTS or 40) do
       local talent = _G[TALENT_FRAME_NAME.."Talent"..i]
       if talent then
         StripTextures(talent)
         SkinButton(talent, nil, nil, nil, _G[TALENT_FRAME_NAME.."Talent"..i.."IconTexture"])
 
-        _G[TALENT_FRAME_NAME.."Talent"..i.."Rank"]:SetFont(pfUI.font_default, C.global.font_size, "OUTLINE")
+        local rank = _G[TALENT_FRAME_NAME.."Talent"..i.."Rank"]
+        if rank then rank:SetFont(pfUI.font_default, C.global.font_size, "OUTLINE") end
       end
     end
 
@@ -53,11 +58,25 @@ pfUI:RegisterSkin("Talents", "vanilla:tbc", function ()
     for i = 1, 5 do
       local tab = _G[TALENT_FRAME_NAME.."Tab"..i]
       local lastTab = _G[TALENT_FRAME_NAME.."Tab"..(i-1)]
-      if lastTab then
-        tab:ClearAllPoints()
-        tab:SetPoint("LEFT", lastTab, "RIGHT", border*2 + 1, 0)
+      if tab then
+        if lastTab then
+          tab:ClearAllPoints()
+          tab:SetPoint("LEFT", lastTab, "RIGHT", border*2 + 1, 0)
+        end
+        SkinTab(tab)
       end
-      SkinTab(tab)
+    end
+
+    -- 3.x: points/preview bars, learn/reset/activate buttons
+    -- WOTLK-CHECK: glyph tab and the spec tabs on the side are not skinned yet
+    for _, bar in pairs({ "PointsBar", "PreviewBar", "PointsLeft", "PointsMiddle", "PointsRight" }) do
+      local object = _G[TALENT_FRAME_NAME..bar]
+      if object then StripTextures(object) end
+    end
+
+    for _, button in pairs({ "ActivateButton", "LearnButton", "ResetButton" }) do
+      local object = _G[TALENT_FRAME_NAME..button]
+      if object then SkinButton(object) end
     end
   end)
 end)
