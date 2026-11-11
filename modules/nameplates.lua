@@ -1,4 +1,4 @@
-pfUI:RegisterModule("nameplates", "vanilla:tbc", function ()
+pfUI:RegisterModule("nameplates", "vanilla:tbc:wotlk", function ()
   -- disable original castbars
   pcall(SetCVar, "ShowVKeyCastbar", 0)
 
@@ -76,7 +76,7 @@ pfUI:RegisterModule("nameplates", "vanilla:tbc", function ()
     if not regions.GetTexture then return nil end
 
     if regions:GetObjectType() ~= "Texture" then return nil end
-    return regions:GetTexture() == "Interface\\Tooltips\\Nameplate-Border" or nil
+    return regions:GetTexture() == (NAMEPLATE_BORDER_TEXTURE or "Interface\\Tooltips\\Nameplate-Border") or nil
   end
 
   local function DisableObject(object)
@@ -378,6 +378,15 @@ pfUI:RegisterModule("nameplates", "vanilla:tbc", function ()
     nameplate.original.healthbar, nameplate.original.castbar = parent:GetChildren()
     DisableObject(nameplate.original.healthbar)
     DisableObject(nameplate.original.castbar)
+
+    -- 3.x: the native castbar (with border, shield and icon regions) is part of
+    -- the plate and keeps showing its own artwork; hide it with alpha instead
+    -- and read its values later on. The icon is the 4th castbar region.
+    -- WOTLK-CHECK: region order of the castbar child
+    if NAMEPLATE_NATIVE_CASTBAR and nameplate.original.castbar then
+      nameplate.original.castbar:SetAlpha(0)
+      nameplate.original.casticon = select(4, nameplate.original.castbar:GetRegions())
+    end
 
     for i, object in pairs({parent:GetRegions()}) do
       if NAMEPLATE_OBJECTORDER[i] and NAMEPLATE_OBJECTORDER[i] == "raidicon" then
@@ -1032,6 +1041,29 @@ pfUI:RegisterModule("nameplates", "vanilla:tbc", function ()
     -- castbar update
     if C.nameplates["showcastbar"] == "1" and ( C.nameplates["targetcastbar"] == "0" or target ) then
       local channel, cast, nameSubtext, text, texture, startTime, endTime, isTradeSkill
+
+      if NAMEPLATE_NATIVE_CASTBAR then
+        -- 3.x: mirror the native castbar of the plate, units can't be queried by name
+        local native = original.castbar
+        if native and native:IsShown() then
+          local min, max = native:GetMinMaxValues()
+          local cur = native:GetValue()
+          nameplate.castbar:SetMinMaxValues(min, max)
+          nameplate.castbar:SetValue(cur)
+          nameplate.castbar.text:SetText(round(math.abs(max - cur), 1))
+          nameplate.castbar.spell:SetText("")
+          nameplate.castbar:Show()
+
+          local icon = original.casticon and original.casticon.GetTexture and original.casticon:GetTexture()
+          if icon then
+            nameplate.castbar.icon.tex:SetTexture(icon)
+            nameplate.castbar.icon.tex:SetTexCoord(.1,.9,.1,.9)
+          end
+        else
+          nameplate.castbar:Hide()
+        end
+        return
+      end
 
       -- detect cast or channel bars
       cast, nameSubtext, text, texture, startTime, endTime, isTradeSkill = UnitCastingInfo(target and "target" or name)
