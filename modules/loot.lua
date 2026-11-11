@@ -1,4 +1,4 @@
-pfUI:RegisterModule("loot", "vanilla:tbc", function ()
+pfUI:RegisterModule("loot", "vanilla:tbc:wotlk", function ()
   local rawborder, border = GetBorderSize()
 
   pfUI.loot = CreateFrame("Frame", "pfLootFrame", UIParent)
@@ -716,7 +716,7 @@ pfUI:RegisterModule("loot", "vanilla:tbc", function ()
         QueueFunction(function()
           if pfUI.client <= 12000 then
             LootSlot(slot)
-          elseif pfUI.client <= 20400 then
+          else
             ConfirmLootSlot(slot)
           end
           StaticPopup_Hide("LOOT_BIND")
