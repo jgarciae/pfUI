@@ -2,6 +2,12 @@ pfUI:RegisterModule("focus", "vanilla:tbc:wotlk", function ()
   -- do not go further on disabled UFs
   if C.unitframes.disable == "1" then return end
 
+  -- hide the blizzard focus frame (3.x, set by the compat layer)
+  if BLIZZARD_FOCUS_FRAME then
+    BLIZZARD_FOCUS_FRAME:Hide()
+    BLIZZARD_FOCUS_FRAME:UnregisterAllEvents()
+  end
+
   pfUI.uf.focus = pfUI.uf:CreateUnitFrame("Focus", nil, C.unitframes.focus, .2)
   pfUI.uf.focus:UpdateFrameSize()
   pfUI.uf.focus:SetPoint("BOTTOMLEFT", UIParent, "BOTTOM", 220, 220)
