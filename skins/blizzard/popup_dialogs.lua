@@ -1,4 +1,4 @@
-pfUI:RegisterSkin("Popup Dialogs", "vanilla:tbc", function ()
+pfUI:RegisterSkin("Popup Dialogs", "vanilla:tbc:wotlk", function ()
   for i = 1, STATICPOPUP_NUMDIALOGS do
     -- Compatibility
     local money = _G["StaticPopup"..i.."MoneyInputFrame"]
