@@ -1,9 +1,10 @@
-pfUI:RegisterModule("skin", "vanilla:tbc", function ()
+pfUI:RegisterModule("skin", "vanilla:tbc:wotlk", function ()
   -- align UIParent panels
   pfUI.panelalign = CreateFrame("Frame", "pfUIParentPanelAlign", UIParent)
   pfUI.panelalign:SetScript("OnUpdate", function()
-    local left = UIParent.left
-    local center = UIParent.center
+    -- WOTLK-CHECK: 3.x has no UIParent.left/center, panels come from GetUIPanel
+    local left = UIParent.left or (GetUIPanel and GetUIPanel("left"))
+    local center = UIParent.center or (GetUIPanel and GetUIPanel("center"))
     local rbpos, ropos
 
     -- detect outer frame backdrops
