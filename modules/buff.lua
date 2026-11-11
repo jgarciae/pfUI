@@ -225,12 +225,10 @@ pfUI:RegisterModule("buff", "vanilla:tbc:wotlk", function ()
   end
 
   pfUI.buff = CreateFrame("Frame", "pfGlobalBuffFrame", UIParent)
-  pfUI.buff:RegisterEvent(PLAYER_AURA_EVENT or "PLAYER_AURAS_CHANGED")
+  if not PLAYER_AURA_EVENT then pfUI.buff:RegisterEvent("PLAYER_AURAS_CHANGED") end
   pfUI.buff:RegisterEvent("UNIT_INVENTORY_CHANGED")
   pfUI.buff:RegisterEvent("UNIT_MODEL_CHANGED")
   pfUI.buff:SetScript("OnEvent", function()
-    if event == "UNIT_AURA" and arg1 ~= "player" then return end
-
     if C.buffs.weapons == "1" then
       local mh, mhtime, mhcharge, oh, ohtime, ohcharge = GetWeaponEnchantInfo()
       pfUI.buff.wepbuffs.count = (mh and 1 or 0) + (oh and 1 or 0)
@@ -252,6 +250,15 @@ pfUI:RegisterModule("buff", "vanilla:tbc:wotlk", function ()
       end
     end
   end)
+
+  -- 3.x: UNIT_AURA fires for every unit, only forward the player
+  if PLAYER_AURA_EVENT then
+    local aura = CreateFrame("Frame")
+    aura:RegisterEvent(PLAYER_AURA_EVENT)
+    aura:SetScript("OnEvent", function()
+      if arg1 == "player" then pfUI.buff:GetScript("OnEvent")() end
+    end)
+  end
 
   -- Weapon Buffs
   pfUI.buff.wepbuffs = CreateFrame("Frame", "pfWepBuffFrame", UIParent)
