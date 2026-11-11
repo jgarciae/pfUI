@@ -1,4 +1,4 @@
-pfUI:RegisterSkin("Character", "vanilla:tbc", function ()
+pfUI:RegisterSkin("Character", "vanilla:tbc:wotlk", function ()
   local rawborder, border = GetBorderSize()
   local bpad = rawborder > 1 and border - GetPerfectPixel() or GetPerfectPixel()
 
@@ -245,7 +245,8 @@ pfUI:RegisterSkin("Character", "vanilla:tbc", function ()
       war.icon:SetPoint("LEFT", -3, -8)
       war.icon:SetTexture("Interface\\Buttons\\UI-CheckBox-SwordCheck")
 
-      SkinCollapseButton(_G["ReputationHeader"..i])
+      -- 3.x renamed the header buttons to ReputationBarNExpandOrCollapseButton
+      SkinCollapseButton(_G["ReputationHeader"..i] or _G["ReputationBar"..i.."ExpandOrCollapseButton"])
     end
 
     StripTextures(ReputationListScrollFrame)
@@ -319,4 +320,16 @@ pfUI:RegisterSkin("Character", "vanilla:tbc", function ()
     SkillDetailStatusBarUnlearnButton:SetPushedTexture(nil)
     SkillDetailStatusBarUnlearnButton:SetNormalTexture("Interface\\Buttons\\UI-GroupLoot-Pass-Up")
   end
+  -- Currency Tab (3.x, Blizzard_TokenUI is loaded on demand)
+  HookAddonOrVariable("Blizzard_TokenUI", function()
+    StripTextures(TokenFrame)
+    StripTextures(TokenFrameContainer)
+    SkinScrollbar(TokenFrameContainerScrollBar)
+
+    StripTextures(TokenFramePopup)
+    CreateBackdrop(TokenFramePopup, nil, nil, .75)
+    SkinCheckbox(TokenFramePopupInactiveCheckBox)
+    SkinCheckbox(TokenFramePopupBackpackCheckBox)
+    SkinCloseButton(TokenFramePopupCloseButton, TokenFramePopup.backdrop, -6, -6)
+  end)
 end)
