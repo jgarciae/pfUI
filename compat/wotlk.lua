@@ -216,11 +216,20 @@ local function ActiveEditBox()
   return (_G.ChatEdit_GetActiveWindow and _G.ChatEdit_GetActiveWindow()) or _G.ChatFrame1EditBox
 end
 
+-- method forwarders are cached per key (no closure per call) and resolve the
+-- active edit box on each call. No vararg expressions: this file must still
+-- parse on the vanilla (Lua 5.0) client before it returns early.
+local editboxmethods = {}
 ChatFrameEditBox = setmetatable({}, { __index = function(_, key)
-  local editbox = ActiveEditBox()
-  local value = editbox[key]
+  local value = ActiveEditBox()[key]
   if type(value) == "function" then
-    return function(_, ...) return value(editbox, ...) end
+    if not editboxmethods[key] then
+      editboxmethods[key] = function(_, a1, a2, a3, a4, a5, a6, a7, a8, a9)
+        local editbox = ActiveEditBox()
+        return editbox[key](editbox, a1, a2, a3, a4, a5, a6, a7, a8, a9)
+      end
+    end
+    return editboxmethods[key]
   end
   return value
 end })
@@ -232,6 +241,21 @@ ChatFrameEditBoxLanguage = _G.ChatFrame1EditBoxLanguage
 function FCF_SetChatWindowFontSize(chatFrame, fontSize)
   return _G.FCF_SetChatWindowFontSize(nil, chatFrame, fontSize)
 end
+
+-- 3.x CombatFeedback_OnCombatEvent/OnUpdate take the frame as first argument,
+-- vanilla/tbc read it from `this`. Keep the old signatures for unitframes.
+function CombatFeedback_OnCombatEvent(event, flags, amount, type)
+  return _G.CombatFeedback_OnCombatEvent(this, event, flags, amount, type)
+end
+
+function CombatFeedback_OnUpdate(elapsed)
+  return _G.CombatFeedback_OnUpdate(this, elapsed)
+end
+
+-- 3.x added overhealing and absorbed before "critical" in the SPELL_HEAL
+-- combat log suffix: (amount, overhealing, absorbed, critical) = arg12..arg15.
+-- tbc: (amount, critical) = arg12, arg13. Used by libpredict.
+COMBATLOG_HEAL_CRIT_ARG = "arg15"
 
 -- ManaBarColor was renamed to PowerBarColor in 3.x (numeric indices kept)
 ManaBarColor = _G.ManaBarColor or _G.PowerBarColor
