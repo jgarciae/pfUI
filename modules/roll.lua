@@ -366,7 +366,7 @@ pfUI:RegisterModule("roll", "vanilla:tbc:wotlk", function ()
       pfUI.roll:SetButtonState(pfUI.roll.frames[id].greed, canGreed, _G["LOOT_ROLL_INELIGIBLE_REASON" .. (reasonGreed or "")])
 
       local dereason = _G["LOOT_ROLL_INELIGIBLE_REASON" .. (reasonDisenchant or "")]
-      if dereason and deSkillRequired and strfind(dereason, "%s", 1, true) then
+      if dereason and deSkillRequired and strfind(dereason, "%%[ds]") then
         dereason = string.format(dereason, deSkillRequired)
       end
       pfUI.roll:SetButtonState(pfUI.roll.frames[id].disenchant, canDisenchant, dereason)
@@ -385,6 +385,9 @@ pfUI:RegisterModule("roll", "vanilla:tbc:wotlk", function ()
       button:SetAlpha(1)
       button.reason = nil
     else
+      -- keep OnEnter working while disabled to show the ineligible reason
+      -- (LootRollButtonTemplate uses motionScriptsWhileDisabled in 3.3.5)
+      if button.SetMotionScriptsWhileDisabled then button:SetMotionScriptsWhileDisabled(true) end
       button:Disable()
       button:SetAlpha(.35)
       button.reason = reason
