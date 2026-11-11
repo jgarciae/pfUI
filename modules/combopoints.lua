@@ -60,8 +60,8 @@ pfUI:RegisterModule("combopoints", "vanilla:tbc:wotlk", function ()
       pfUI.combopoints:DisplayNum(GetComboPoints("target"))
     end)
 
-  -- reck
-  elseif class == "PALADIN" then
+  -- reck (vanilla talent, tracked through the old combat chat events)
+  elseif class == "PALADIN" and not COMBOPOINTS_NO_RECKONING then
     local reck = CreateFrame("Frame")
     reck:RegisterEvent("CHARACTER_POINTS_CHANGED")
     reck:RegisterEvent("PLAYER_DEAD")
