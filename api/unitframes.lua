@@ -51,7 +51,7 @@ local function BuffOnUpdate()
 end
 
 local function TargetBuffOnUpdate()
-  local name, rank, icon, count, duration, timeleft = _G.UnitBuff("target", this.id)
+  local name, rank, icon, count, duration, timeleft = (UnitBuffTimed or _G.UnitBuff)("target", this.id)
   if duration and timeleft then
     CooldownFrame_SetTimer(this.cd, GetTime() + timeleft - duration, duration, 1)
   else
@@ -1180,7 +1180,7 @@ function pfUI.uf:EnableEvents()
   f:RegisterEvent("UNIT_MODEL_CHANGED")
   f:RegisterEvent("UNIT_FACTION")
   f:RegisterEvent("UNIT_AURA") -- frame=buff, frame=debuff
-  f:RegisterEvent("PLAYER_AURAS_CHANGED") -- label=player && frame=buff
+  if not PLAYER_AURA_EVENT then f:RegisterEvent("PLAYER_AURAS_CHANGED") end -- label=player && frame=buff
   f:RegisterEvent("UNIT_INVENTORY_CHANGED") -- label=player && frame=buff
   f:RegisterEvent("PARTY_MEMBERS_CHANGED") -- label=party, frame=leaderIcon
   f:RegisterEvent("PARTY_LEADER_CHANGED") -- frame=leaderIcon
@@ -1783,7 +1783,7 @@ function pfUI.uf:RefreshUnit(unit, component)
         local texture, count = UnitBuff(unitstr, i)
         local timeleft, _
         if pfUI.client > 11200 then
-          _, _, texture, _, _, timeleft = _G.UnitBuff(unitstr, i)
+          _, _, texture, _, _, timeleft = (UnitBuffTimed or _G.UnitBuff)(unitstr, i)
         end
 
         if texture then
@@ -1824,7 +1824,7 @@ function pfUI.uf:RefreshUnit(unit, component)
         if texture then
           local timeleft, name, _
           if pfUI.client > 11200 then
-            name, _, texture, _, _, timeleft = _G.UnitBuff(unitstr, i)
+            name, _, texture, _, _, timeleft = (UnitBuffTimed or _G.UnitBuff)(unitstr, i)
           else
             scanner:SetUnitBuff(unitstr, i)
             name = scanner:Line(1) or ""

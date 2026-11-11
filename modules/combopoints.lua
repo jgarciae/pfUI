@@ -53,7 +53,7 @@ pfUI:RegisterModule("combopoints", "vanilla:tbc:wotlk", function ()
   if class == "DRUID" or class == "ROGUE" then
     local combo = CreateFrame("Frame")
     combo:RegisterEvent("UNIT_COMBO_POINTS")
-    combo:RegisterEvent("PLAYER_COMBO_POINTS")
+    if not NO_PLAYER_COMBO_EVENT then combo:RegisterEvent("PLAYER_COMBO_POINTS") end
     combo:RegisterEvent("PLAYER_TARGET_CHANGED")
     combo:RegisterEvent("PLAYER_ENTERING_WORLD")
     combo:SetScript("OnEvent", function()

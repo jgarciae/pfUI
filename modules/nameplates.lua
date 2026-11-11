@@ -309,7 +309,7 @@ pfUI:RegisterModule("nameplates", "vanilla:tbc:wotlk", function ()
   nameplates:RegisterEvent("PLAYER_ENTERING_WORLD")
   nameplates:RegisterEvent("PLAYER_TARGET_CHANGED")
   nameplates:RegisterEvent("UNIT_COMBO_POINTS")
-  nameplates:RegisterEvent("PLAYER_COMBO_POINTS")
+  if not NO_PLAYER_COMBO_EVENT then nameplates:RegisterEvent("PLAYER_COMBO_POINTS") end
   nameplates:RegisterEvent("UNIT_AURA")
 
   nameplates:SetScript("OnEvent", function()
