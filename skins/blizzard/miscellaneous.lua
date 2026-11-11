@@ -1,4 +1,4 @@
-pfUI:RegisterSkin("Stack Split", "vanilla:tbc", function ()
+pfUI:RegisterSkin("Stack Split", "vanilla:tbc:wotlk", function ()
   StripTextures(StackSplitFrame)
   CreateBackdrop(StackSplitFrame, nil, nil, .75)
   CreateBackdropShadow(StackSplitFrame)
