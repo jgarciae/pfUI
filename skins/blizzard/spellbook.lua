@@ -49,8 +49,11 @@ pfUI:RegisterSkin("Spellbook", "vanilla:tbc:wotlk", function ()
     StripTextures(button)
     SkinButton(button, nil, nil, nil, texture)
 
+    -- 3.x has no normal texture before the first update, SkinButton creates it
+    texture = texture or button:GetNormalTexture()
+
     button:SetScale(1.1)
-    texture:SetTexCoord(.07,.93,.07,.93)
+    if texture then texture:SetTexCoord(.07,.93,.07,.93) end
 
     if lastbutton then
       button:ClearAllPoints()
