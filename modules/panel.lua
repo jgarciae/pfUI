@@ -839,7 +839,7 @@ pfUI:RegisterModule("panel", "vanilla:tbc:wotlk", function()
     pfUI.panel.microbutton:SetFrameStrata("MEDIUM")
 
     -- the anchoring is kept in a function, the vehicle ui of 3.x moves the
-    -- buttons around and the vehicle module needs to restore it afterwards
+    -- buttons around and they need to be restored afterwards
     local function AnchorMicroButtons()
       for i=1,table.getn(MICRO_BUTTONS) do
         local anchor = _G[MICRO_BUTTONS[i-1]] or pfUI.panel.microbutton
@@ -868,6 +868,12 @@ pfUI:RegisterModule("panel", "vanilla:tbc:wotlk", function()
 
     AnchorMicroButtons()
     pfUI.panel.microbutton.Anchor = AnchorMicroButtons
+
+    -- 3.x moves the micro buttons to the vehicle ui and back to the Blizzard
+    -- main menu bar (VehicleMenuBar.lua), always take them back afterwards
+    if VehicleMenuBar_MoveMicroButtons then
+      hooksecurefunc("VehicleMenuBar_MoveMicroButtons", AnchorMicroButtons)
+    end
   end
 
 
