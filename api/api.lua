@@ -287,6 +287,14 @@ end
 -- 'name'       [string]         name of the item
 -- returns:     [string]         entire itemLink for the given item
 function pfUI.api.GetItemLinkByName(name)
+  if not name then return end
+
+  -- resolve cached item names natively when the client supports it
+  if ITEMLINK_BY_NAME then
+    local _, link = GetItemInfo(name)
+    return link
+  end
+
   for itemID = 1, 25818 do
     local itemName, hyperLink, itemQuality = GetItemInfo(itemID)
     if (itemName and itemName == name) then

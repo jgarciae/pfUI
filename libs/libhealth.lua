@@ -10,10 +10,13 @@ local libhealth = CreateFrame("Frame")
 libhealth.enabled = true
 libhealth.reqhit = 4
 libhealth.reqdmg = 5
-libhealth:RegisterEvent("UNIT_HEALTH")
-libhealth:RegisterEvent("UNIT_COMBAT")
-libhealth:RegisterEvent("PLAYER_TARGET_CHANGED")
-libhealth:RegisterEvent("PLAYER_ENTERING_WORLD")
+-- skip estimation when the client already reports real health values
+if not UNITHEALTH_NATIVE then
+  libhealth:RegisterEvent("UNIT_HEALTH")
+  libhealth:RegisterEvent("UNIT_COMBAT")
+  libhealth:RegisterEvent("PLAYER_TARGET_CHANGED")
+  libhealth:RegisterEvent("PLAYER_ENTERING_WORLD")
+end
 libhealth:SetScript("OnEvent", function()
   if event == "PLAYER_ENTERING_WORLD" then
     -- create initial health cache tables

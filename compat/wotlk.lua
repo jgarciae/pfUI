@@ -287,6 +287,14 @@ end
 -- tbc: (amount, critical) = arg12, arg13. Used by libpredict.
 COMBATLOG_HEAL_CRIT_ARG = "arg15"
 
+-- GetItemInfo accepts cached item names and returns complete item links,
+-- GetItemLinkByName (api.lua) uses it instead of scanning item ids.
+ITEMLINK_BY_NAME = true
+
+-- UnitHealth reports real values for every unit, libhealth estimation is
+-- not required and registers no events.
+UNITHEALTH_NATIVE = true
+
 -- ManaBarColor was renamed to PowerBarColor in 3.x (numeric indices kept)
 ManaBarColor = _G.ManaBarColor or _G.PowerBarColor
 
