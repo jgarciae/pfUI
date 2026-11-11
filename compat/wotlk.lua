@@ -69,11 +69,23 @@ function GetContainerNumSlots(bag)
   end
 end
 
--- map libdebuff to the regular function
+-- map libdebuff to the native aura data. expirationTime is a GetTime()
+-- timestamp in 3.x, convert it to the remaining time pfUI expects.
+local function AuraData(unit, index, filter)
+  local name, rank, icon, count, dtype, duration, expiration, caster = _G.UnitAura(unit, index, filter)
+  if not name then return end
+  local timeleft = (expiration and expiration > 0) and (expiration - GetTime()) or nil
+  if duration == 0 then duration = nil end
+  return name, rank, icon, count, dtype, duration, timeleft, caster
+end
+
 libdebuff = {
-  ["UnitDebuff"] = function(self, a1, a2, a3)
-    return _G.UnitDebuff(a1,a2,a3)
-  end
+  ["UnitDebuff"] = function(self, unit, index)
+    return AuraData(unit, index, "HARMFUL")
+  end,
+  ["UnitOwnDebuff"] = function(self, unit, index)
+    return AuraData(unit, index, "HARMFUL|PLAYER")
+  end,
 }
 
 -- WOTLK-CHECK: UnitMana/UnitManaMax are kept as aliases of UnitPower in 3.3.5
