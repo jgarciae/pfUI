@@ -1,4 +1,4 @@
-pfUI:RegisterSkin("tracking", "tbc", function ()
+pfUI:RegisterSkin("tracking", "tbc:wotlk", function ()
   MINIMAP_TRACKING_FRAME:DisableDrawLayer("ARTWORK") -- hide border
   SkinButton(MINIMAP_TRACKING_FRAME, nil, nil, nil, MiniMapTrackingIcon, true)
   MINIMAP_TRACKING_FRAME:SetHeight(tonumber(C.appearance.minimap.tracking_size) + 10)
