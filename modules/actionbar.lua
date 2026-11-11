@@ -328,7 +328,10 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc:wotlk", function ()
     local self = self or this
     -- 3.x passes (self, button, down) instead of the arg1/keystate globals
     local arg1 = button or arg1
-    local keystate = button and (down and "down" or "up") or keystate
+    -- only trust the handler argument when the client passes it (3.x),
+    -- tbc passes the button but no "down" flag and sets the keystate global
+    local keystate = keystate
+    if down ~= nil then keystate = down and "down" or "up" end
     mouse = arg1 and not keystate
 
     -- trigger action animation
@@ -874,10 +877,13 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc:wotlk", function ()
       end
     elseif pfUI.client >= 30000 then
       -- 3.x: the header applies "actionpage" to its buttons (ID + (page-1)*12)
-      local pages = {}
-      for i=1, 6 do
-        local page = i == 1 and 1 or C.bars["bar"..i] and C.bars["bar"..i].pageable == "1" and i
-        if page then table.insert(pages, page) end
+      -- fill all six page states, cycling through the pageable bars (as tbc)
+      local page, pages = nil, {}
+      while not pages[6] do
+        for i=1, 6 do
+          page = i == 1 and 1 or C.bars["bar"..i] and C.bars["bar"..i].pageable == "1" and i
+          if page then table.insert(pages, page) end
+        end
       end
 
       -- prio possess/vehicle bar
@@ -893,8 +899,9 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc:wotlk", function ()
         end
       end
 
-      -- WOTLK-CHECK: stance pages follow the tbc layout (pfUI bars 7-10)
-      bar.filter = string.format("%s[bonusbar:1,nostealth] 7; [bonusbar:1,stealth] %s; [bonusbar:2] 10; [bonusbar:3] 9; [bonusbar:4] 10; 1", bar.filter, prowl)
+      -- stance pages: NUM_ACTIONBAR_PAGES + GetBonusBarOffset() (ActionButton_CalculateAction)
+      -- warrior battle/def/berserker 7/8/9, druid cat 7 bear 9 moonkin 10, rogue/priest 7
+      bar.filter = string.format("%s[bonusbar:1,nostealth] 7; [bonusbar:1,stealth] %s; [bonusbar:2] 8; [bonusbar:3] 9; [bonusbar:4] 10; 1", bar.filter, prowl)
 
       if C.bars.pagemaster == "1" then
         for mod, page in pairs({ ["shift"] = "6", ["ctrl"] = "5", ["alt"] = "3" }) do
