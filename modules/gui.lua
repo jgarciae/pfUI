@@ -160,6 +160,8 @@ pfUI:RegisterModule("gui", "vanilla:tbc:wotlk", function ()
 
         ufunc = function()
           _G[config] = this:GetChecked() and "1" or "0"
+          -- 3.x mirrors interface option globals to a cvar, which is the persisted value
+          if UVAR_CVARS and UVAR_CVARS[config] then SetCVar(UVAR_CVARS[config], _G[config]) end
           if U then
             U()
           end

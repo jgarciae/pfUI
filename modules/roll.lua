@@ -1,5 +1,8 @@
 pfUI:RegisterModule("roll", "vanilla:tbc:wotlk", function ()
-  -- WOTLK-CHECK: GetLootRollItemInfo also returns canNeed/canGreed/canDisenchant in 3.3.5; the buttons are not disabled accordingly yet.
+  -- wotlk only (compat/wotlk.lua): GetLootRollItemInfo returns canNeed, canGreed
+  -- and canDisenchant (LootFrame.lua 3.3.5), RollOnLoot(id, 3) disenchants.
+  local extended = ROLL_HAS_DISENCHANT and LOOT_ROLL_DISENCHANT and true or nil
+  local boeoffset = extended and 2 or 0
   pfUI.roll = CreateFrame("Frame", "pfLootRoll", UIParent)
   pfUI.roll.frames = {}
 
@@ -34,6 +37,14 @@ pfUI:RegisterModule("roll", "vanilla:tbc:wotlk", function ()
       pfUI.roll:AddCache(item, player, "PASS")
       return
     end
+
+    if extended then
+      local player, item = cmatch(arg1, LOOT_ROLL_DISENCHANT)
+      if player and item then
+        pfUI.roll:AddCache(item, player, "DISENCHANT")
+        return
+      end
+    end
   end)
 
   function pfUI.roll:AddCache(hyperlink, name, roll)
@@ -52,7 +63,7 @@ pfUI:RegisterModule("roll", "vanilla:tbc:wotlk", function ()
 
     -- initialize itemtable
     if not pfUI.roll.cache[itemName] then
-      pfUI.roll.cache[itemName] = { ["GREED"] = {}, ["NEED"] = {}, ["PASS"] = {}, ["TIMESTAMP"] = GetTime() }
+      pfUI.roll.cache[itemName] = { ["GREED"] = {}, ["NEED"] = {}, ["PASS"] = {}, ["DISENCHANT"] = {}, ["TIMESTAMP"] = GetTime() }
     end
 
     -- ignore already listed names
@@ -71,6 +82,11 @@ pfUI:RegisterModule("roll", "vanilla:tbc:wotlk", function ()
         pfUI.roll.frames[id].greed.count:SetText(count_greed > 0 and count_greed or "")
         pfUI.roll.frames[id].need.count:SetText(count_need > 0 and count_need or "")
         pfUI.roll.frames[id].pass.count:SetText(count_pass > 0 and count_pass or "")
+
+        if pfUI.roll.frames[id].disenchant then
+          local count_de = table.getn(pfUI.roll.cache[itemName]["DISENCHANT"])
+          pfUI.roll.frames[id].disenchant.count:SetText(count_de > 0 and count_de or "")
+        end
       end
     end
   end
@@ -140,6 +156,7 @@ pfUI:RegisterModule("roll", "vanilla:tbc:wotlk", function ()
     f.need:SetScript("OnEnter", function()
       GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
       GameTooltip:SetText("|cff33ffcc" .. NEED)
+      if this.reason then GameTooltip:AddLine(this.reason, 1, .3, .3, 1) end
       if f.itemname and pfUI.roll.cache[f.itemname] then
         for _, player in pairs(pfUI.roll.cache[f.itemname]["NEED"]) do
           GameTooltip:AddLine(player)
@@ -169,6 +186,7 @@ pfUI:RegisterModule("roll", "vanilla:tbc:wotlk", function ()
     f.greed:SetScript("OnEnter", function()
       GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
       GameTooltip:SetText("|cff33ffcc" .. GREED)
+      if this.reason then GameTooltip:AddLine(this.reason, 1, .3, .3, 1) end
       if f.itemname and pfUI.roll.cache[f.itemname] then
         for _, player in pairs(pfUI.roll.cache[f.itemname]["GREED"]) do
           GameTooltip:AddLine(player)
@@ -209,8 +227,40 @@ pfUI:RegisterModule("roll", "vanilla:tbc:wotlk", function ()
       GameTooltip:Hide()
     end)
 
+    if extended then
+      f.disenchant = CreateFrame("Button", "pfLootRollFrame" .. id .. "Disenchant", f)
+      f.disenchant:SetPoint("LEFT", f.icon, "RIGHT", border*9+esize*3, 0)
+      f.disenchant:SetWidth(esize)
+      f.disenchant:SetHeight(esize)
+      f.disenchant:SetNormalTexture("Interface\\Buttons\\UI-GroupLoot-DE-Up")
+      f.disenchant:SetHighlightTexture("Interface\\Buttons\\UI-GroupLoot-DE-Highlight")
+
+      f.disenchant.count = f.disenchant:CreateFontString("DISENCHANT")
+      f.disenchant.count:SetPoint("CENTER", f.disenchant, "CENTER", 0, 0)
+      f.disenchant.count:SetJustifyH("CENTER")
+      f.disenchant.count:SetFont(pfUI.font_default, C.global.font_size, "OUTLINE")
+
+      f.disenchant:SetScript("OnClick", function()
+        RollOnLoot(this:GetParent().rollID, 3)
+      end)
+      f.disenchant:SetScript("OnEnter", function()
+        GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
+        GameTooltip:SetText("|cff33ffcc" .. ROLL_DISENCHANT)
+        if this.reason then GameTooltip:AddLine(this.reason, 1, .3, .3, 1) end
+        if f.itemname and pfUI.roll.cache[f.itemname] then
+          for _, player in pairs(pfUI.roll.cache[f.itemname]["DISENCHANT"]) do
+            GameTooltip:AddLine(player)
+          end
+        end
+        GameTooltip:Show()
+      end)
+      f.disenchant:SetScript("OnLeave", function()
+        GameTooltip:Hide()
+      end)
+    end
+
     f.boe = CreateFrame("Frame", "pfLootRollFrame" .. id .. "BOE", f)
-    f.boe:SetPoint("LEFT", f.icon, "RIGHT", border*9+esize*3, 0)
+    f.boe:SetPoint("LEFT", f.icon, "RIGHT", border*(9+boeoffset)+esize*(3+boeoffset/2), 0)
     f.boe:SetWidth(esize*2)
     f.boe:SetHeight(esize)
     f.boe.text = f.boe:CreateFontString("BOE")
@@ -219,7 +269,7 @@ pfUI:RegisterModule("roll", "vanilla:tbc:wotlk", function ()
     f.boe.text:SetFont(pfUI.font_default, C.global.font_size, "OUTLINE")
 
     f.name = CreateFrame("Frame", "pfLootRollFrame" .. id .. "Name", f)
-    f.name:SetPoint("LEFT", f.icon, "RIGHT", border*11+esize*4, 0)
+    f.name:SetPoint("LEFT", f.icon, "RIGHT", border*(11+boeoffset)+esize*(4+boeoffset/2), 0)
     f.name:SetPoint("RIGHT", f, "RIGHT", border*2, 0)
     f.name:SetHeight(esize)
     f.name.text = f.name:CreateFontString("NAME")
@@ -278,7 +328,9 @@ pfUI:RegisterModule("roll", "vanilla:tbc:wotlk", function ()
   end
 
   function pfUI.roll:UpdateLootRoll(id)
-    local texture, name, count, quality, bop = GetLootRollItemInfo(pfUI.roll.frames[id].rollID)
+    local texture, name, count, quality, bop, canNeed, canGreed, canDisenchant,
+      reasonNeed, reasonGreed, reasonDisenchant, deSkillRequired = GetLootRollItemInfo(pfUI.roll.frames[id].rollID)
+    if not name then pfUI.roll.frames[id]:Hide() return end
     local color = ITEM_QUALITY_COLORS[quality]
 
     pfUI.roll.frames[id].itemname = name
@@ -309,7 +361,34 @@ pfUI:RegisterModule("roll", "vanilla:tbc:wotlk", function ()
       pfUI.roll.frames[id].boe.text:SetTextColor(.3,1,.3,1)
     end
 
+    if extended then
+      pfUI.roll:SetButtonState(pfUI.roll.frames[id].need, canNeed, _G["LOOT_ROLL_INELIGIBLE_REASON" .. (reasonNeed or "")])
+      pfUI.roll:SetButtonState(pfUI.roll.frames[id].greed, canGreed, _G["LOOT_ROLL_INELIGIBLE_REASON" .. (reasonGreed or "")])
+
+      local dereason = _G["LOOT_ROLL_INELIGIBLE_REASON" .. (reasonDisenchant or "")]
+      if dereason and deSkillRequired and strfind(dereason, "%s", 1, true) then
+        dereason = string.format(dereason, deSkillRequired)
+      end
+      pfUI.roll:SetButtonState(pfUI.roll.frames[id].disenchant, canDisenchant, dereason)
+
+      local count_de = pfUI.roll.cache[name] and table.getn(pfUI.roll.cache[name]["DISENCHANT"]) or 0
+      pfUI.roll.frames[id].disenchant.count:SetText(count_de > 0 and count_de or "")
+    end
+
     pfUI.roll.frames[id]:Show()
+  end
+
+  -- grey out and disable roll buttons the player is not eligible for
+  function pfUI.roll:SetButtonState(button, enabled, reason)
+    if enabled then
+      button:Enable()
+      button:SetAlpha(1)
+      button.reason = nil
+    else
+      button:Disable()
+      button:SetAlpha(.35)
+      button.reason = reason
+    end
   end
 
   for i=1,4 do

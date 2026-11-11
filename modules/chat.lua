@@ -236,14 +236,14 @@ pfUI:RegisterModule("chat", "vanilla:tbc:wotlk", function ()
     pfUI.chat.urlcopy:Show()
   end
 
-  function _G.SetItemRef(link, text, button)
+  function _G.SetItemRef(link, text, button, chatFrame)
     if (strsub(link, 1, 3) == "url") then
       if string.len(link) > 4 and string.sub(link,1,4) == "url:" then
         pfUI.chat.urlcopy.CopyText(string.sub(link,5, string.len(link)))
       end
       return
     end
-    pfUI.chat.urlcopy.SetItemRef(link, text, button)
+    pfUI.chat.urlcopy.SetItemRef(link, text, button, chatFrame)
   end
 
   pfUI.chat.right = CreateFrame("Frame", "pfChatRight", UIParent)
@@ -417,7 +417,8 @@ pfUI:RegisterModule("chat", "vanilla:tbc:wotlk", function ()
         end
       end
 
-      _G["ChatFrame" .. i .. "ResizeBottom"]:Hide()
+      -- "ResizeBottom" does not exist in 3.x (only "ResizeButton")
+      if _G["ChatFrame" .. i .. "ResizeBottom"] then _G["ChatFrame" .. i .. "ResizeBottom"]:Hide() end
       _G["ChatFrame" .. i .. "TabText"]:SetJustifyV("CENTER")
       _G["ChatFrame" .. i .. "TabText"]:SetHeight(C.global.font_size+default_border*2)
       _G["ChatFrame" .. i .. "TabText"]:SetPoint("BOTTOM", 0, default_border)
@@ -869,7 +870,7 @@ pfUI:RegisterModule("chat", "vanilla:tbc:wotlk", function ()
   -- create playerlinks on shift-click
   if C.chat.text.playerlinks == "1" then
     local pfHookSetItemRef = SetItemRef
-    _G.SetItemRef = function(link, text, button)
+    _G.SetItemRef = function(link, text, button, chatFrame)
       if ( strsub(link, 1, 6) == "player" ) then
         local name = strsub(link, 8)
         if ( name and (strlen(name) > 0) ) then
@@ -882,7 +883,7 @@ pfUI:RegisterModule("chat", "vanilla:tbc:wotlk", function ()
           end
         end
       end
-      pfHookSetItemRef(link, text, button)
+      pfHookSetItemRef(link, text, button, chatFrame)
     end
   end
 end)

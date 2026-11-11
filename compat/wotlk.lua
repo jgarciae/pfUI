@@ -101,6 +101,9 @@ FRIENDS_NAME_LOCATION = "ButtonTextLocation"
 COOLDOWN_FRAME_TYPE = "Cooldown"
 LOOT_BUTTON_FRAME_TYPE = "Button"
 
+-- 3.x loot rolls: need/greed eligibility and the disenchant button (roll.lua)
+ROLL_HAS_DISENCHANT = true
+
 -- WOTLK-CHECK: GetPlayerBuff is still present in 3.3.5 (deprecated); buff.lua
 -- should move to UnitAura in its own commit.
 PLAYER_BUFF_START_ID = 0
@@ -109,6 +112,9 @@ PLAYER_BUFF_START_ID = 0
 ACTIONBAR_SECURE_TEMPLATE_BAR = "SecureHandlerStateTemplate"
 ACTIONBAR_SECURE_TEMPLATE_BUTTON = "SecureActionButtonTemplate"
 UNITFRAME_SECURE_TEMPLATE = "SecureUnitButtonTemplate"
+
+-- interface option globals (UVAR) that 3.x persists through a cvar, see uvarInfo in InterfaceOptionsFrame.lua
+UVAR_CVARS = { ["LOCK_ACTIONBAR"] = "lockActionBars" }
 
 --[[ WotLK API Extensions ]]--
 -- Present the 3.x return values in the vanilla layout the modules expect.
