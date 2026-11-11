@@ -399,7 +399,7 @@ pfUI:RegisterModule("loot", "vanilla:tbc:wotlk", function ()
     pfUI.loot:RemoveMasterlootMenus() -- remove then add to ensure no duplicate menus
     pfUI.loot:AddMasterLootMenus()
     hooksecurefunc("UnitPopup_OnClick",function()
-      local dropdownFrame = _G[UIDROPDOWNMENU_INIT_MENU]
+      local dropdownFrame = GetDropDownMenu()
       if not dropdownFrame then return end
       local button = this.value
       local unit = dropdownFrame.unit
@@ -412,7 +412,8 @@ pfUI:RegisterModule("loot", "vanilla:tbc:wotlk", function ()
       end
     end)
     hooksecurefunc("UnitPopup_HideButtons",function()
-      local dropdownFrame = _G[UIDROPDOWNMENU_INIT_MENU]
+      local dropdownFrame = GetDropDownMenu()
+      if not dropdownFrame or not dropdownFrame.which then return end
       local unit = dropdownFrame.unit
       local name = dropdownFrame.name
       for index,value in pairs(UnitPopupMenus[dropdownFrame.which]) do
@@ -522,7 +523,7 @@ pfUI:RegisterModule("loot", "vanilla:tbc:wotlk", function ()
 
   local function CloseOnClick()
     local lootbind = StaticPopup_FindVisible("LOOT_BIND")
-    local masterloot = UIDROPDOWNMENU_INIT_MENU and (UIDROPDOWNMENU_INIT_MENU == "GroupLootDropDown")
+    local masterloot = GetDropDownMenu() and GetDropDownMenu() == GroupLootDropDown
     if lootbind or masterloot then else CloseLoot() end
   end
 

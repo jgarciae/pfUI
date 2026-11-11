@@ -1337,6 +1337,16 @@ end
 -- 'layer'      [string]
 -- 'arg1'       [string]
 -- return object
+-- [ GetDropDownMenu ]
+-- Returns the frame of the currently initialized dropdown menu.
+-- 3.x stores the frame itself, older clients store its name.
+-- return:      [frame]         the dropdown frame or nil
+function pfUI.api.GetDropDownMenu()
+  local menu = UIDROPDOWNMENU_INIT_MENU
+  if type(menu) == "string" then return _G[menu] end
+  return menu
+end
+
 function pfUI.api.GetNoNameObject(frame, objtype, layer, arg1, arg2)
   local arg1 = arg1 and gsub(arg1, "([%+%-%*%(%)%?%[%]%^])", "%%%1")
   local arg2 = arg2 and gsub(arg2, "([%+%-%*%(%)%?%[%]%^])", "%%%1")

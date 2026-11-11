@@ -122,7 +122,7 @@ pfUI:RegisterModule("raid", "vanilla:tbc:wotlk", function ()
 
   hooksecurefunc("UnitPopup_OnClick", function()
     -- 3.x stores the dropdown frame itself, vanilla/tbc its name
-    local dropdownFrame = type(UIDROPDOWNMENU_INIT_MENU) == "table" and UIDROPDOWNMENU_INIT_MENU or _G[UIDROPDOWNMENU_INIT_MENU]
+    local dropdownFrame = GetDropDownMenu()
     if not dropdownFrame then return end
     local button = this.value
     local unit = dropdownFrame.unit

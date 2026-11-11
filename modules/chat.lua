@@ -28,7 +28,8 @@ pfUI:RegisterModule("chat", "vanilla:tbc:wotlk", function ()
 
   hooksecurefunc("UnitPopup_OnClick", function(self)
     if this.value == "IGNORE_PLAYER" then
-      AddIgnore(_G[UIDROPDOWNMENU_INIT_MENU].name)
+      local menu = GetDropDownMenu()
+      if menu and menu.name then AddIgnore(menu.name) end
     end
   end)
 
