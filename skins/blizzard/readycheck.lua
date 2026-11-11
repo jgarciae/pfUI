@@ -10,9 +10,12 @@ pfUI:RegisterSkin("Readycheck", "vanilla:tbc:wotlk", function ()
       update_func = "ReadyCheck_OnUpdate"
     end
 
-    StripTextures(ReadyCheckFrame, true)
-    CreateBackdrop(ReadyCheckFrame, nil, nil, .75)
-    CreateBackdropShadow(ReadyCheckFrame)
+    -- 3.x: the artwork and text live in ReadyCheckListenerFrame, which is hidden
+    -- for the initiator while ReadyCheckFrame itself stays shown (ReadyCheck.lua)
+    local readyframe = ReadyCheckListenerFrame or ReadyCheckFrame
+    StripTextures(readyframe, true)
+    CreateBackdrop(readyframe, nil, nil, .75)
+    CreateBackdropShadow(readyframe)
 
     SkinButton(ReadyCheckFrameYesButton)
     ReadyCheckFrameYesButton:ClearAllPoints()
