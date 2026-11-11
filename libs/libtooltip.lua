@@ -94,7 +94,7 @@ end
 
 local pfHookSetInboxItem = GameTooltip.SetInboxItem
 function GameTooltip.SetInboxItem(self, mailID, attachmentIndex)
-  local itemName, itemTexture, inboxItemCount, inboxItemQuality = GetInboxItem(mailID)
+  local itemName, itemTexture, inboxItemCount, inboxItemQuality = GetInboxItem(mailID, attachmentIndex)
   libtooltip.itemLink = GetItemLinkByName(itemName)
   return pfHookSetInboxItem(self, mailID, attachmentIndex)
 end
@@ -117,16 +117,21 @@ function GameTooltip.SetMerchantItem(self, merchantIndex)
   return pfHookSetMerchantItem(self, merchantIndex)
 end
 
+-- the craft api (enchanting, beast training) is gone since 3.x
 local pfHookSetCraftItem = GameTooltip.SetCraftItem
-function GameTooltip.SetCraftItem(self, skill, slot)
-  libtooltip.itemLink = GetCraftReagentItemLink(skill, slot)
-  return pfHookSetCraftItem(self, skill, slot)
+if pfHookSetCraftItem then
+  function GameTooltip.SetCraftItem(self, skill, slot)
+    libtooltip.itemLink = GetCraftReagentItemLink(skill, slot)
+    return pfHookSetCraftItem(self, skill, slot)
+  end
 end
 
 local pfHookSetCraftSpell = GameTooltip.SetCraftSpell
-function GameTooltip.SetCraftSpell(self, slot)
-  libtooltip.itemLink = GetCraftItemLink(slot)
-  return pfHookSetCraftSpell(self, slot)
+if pfHookSetCraftSpell then
+  function GameTooltip.SetCraftSpell(self, slot)
+    libtooltip.itemLink = GetCraftItemLink(slot)
+    return pfHookSetCraftSpell(self, slot)
+  end
 end
 
 local pfHookSetTradeSkillItem = GameTooltip.SetTradeSkillItem
