@@ -2005,6 +2005,9 @@ function pfUI.uf:RefreshUnit(unit, component)
       r, g, b, a = GetStringColor(focus)
     elseif utype == 3 then
       r, g, b, a = GetStringColor(energy)
+    elseif ManaBarColor[utype] then
+      -- power types without a pfUI color option (e.g runic power)
+      r, g, b = ManaBarColor[utype].r, ManaBarColor[utype].g, ManaBarColor[utype].b
     end
 
     unit.power.bar:SetStatusBarColor(r, g, b, a)
