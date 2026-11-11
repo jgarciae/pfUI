@@ -1,4 +1,4 @@
-pfUI:RegisterModule("actionbar", "vanilla:tbc", function ()
+pfUI:RegisterModule("actionbar", "vanilla:tbc:wotlk", function ()
   local _, class = UnitClass("player")
   local color = RAID_CLASS_COLORS[class]
   local cr, cg, cb = color.r , color.g, color.b
@@ -67,7 +67,8 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc", function ()
     return txt
   end
 
-  kill(MainMenuBar)
+  -- 3.x re-shows the MainMenuBar when leaving a vehicle, block it as well
+  kill(MainMenuBar, pfUI.client >= 30000)
 
   local blizzard_elements = { MultiBarBottomLeft,
     MultiBarBottomRight, MultiBarLeft, MultiBarRight }
@@ -815,6 +816,9 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc", function ()
     end
   end
 
+  -- expansion specific events (compat layer): shapeshift updates
+  for _, event in pairs(ACTIONBAR_EXTRA_AURA_EVENTS or {}) do aura_events[event] = true end
+
   -- create the main event and update handler for pfUI actionbars
   local bars = CreateFrame("Frame", "pfActionBar", UIParent)
   for event in pairs(special_events) do bars:RegisterEvent(event) end
@@ -859,6 +863,56 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc", function ()
           end
         end)
       end
+    elseif pfUI.client >= 30000 then
+      -- 3.x: the header applies "actionpage" to its buttons (ID + (page-1)*12)
+      local pages = {}
+      for i=1, 6 do
+        local page = i == 1 and 1 or C.bars["bar"..i] and C.bars["bar"..i].pageable == "1" and i
+        if page then table.insert(pages, page) end
+      end
+
+      -- prio possess/vehicle bar
+      bar.filter = "[bonusbar:5] 11; "
+
+      -- set bar 8 for druid stealth if enabled
+      local prowl = class == "DRUID" and C.bars["druidstealth"] == "1" and "8" or "7"
+
+      -- write default pages, page 1 stays dynamic for stances
+      for state, page in pairs(pages) do
+        if page ~= 1 then
+          bar.filter = string.format("%s[actionbar:%s] %s; ", bar.filter, state, page)
+        end
+      end
+
+      -- WOTLK-CHECK: stance pages follow the tbc layout (pfUI bars 7-10)
+      bar.filter = string.format("%s[bonusbar:1,nostealth] 7; [bonusbar:1,stealth] %s; [bonusbar:2] 10; [bonusbar:3] 9; [bonusbar:4] 10; 1", bar.filter, prowl)
+
+      if C.bars.pagemaster == "1" then
+        for mod, page in pairs({ ["shift"] = "6", ["ctrl"] = "5", ["alt"] = "3" }) do
+          bar.filter = string.format("[modifier:%s] %s;", mod, page) .. bar.filter
+        end
+      end
+
+      -- keep the displayed slot ids in sync with the secure page
+      -- EnablePaging runs on every config update, hook only once
+      if not bar.pagehook then bar.pagehook = true bar:HookScript("OnAttributeChanged", function(self, name, value)
+        if name ~= "actionpage" then return end
+        local page = tonumber(value) or 1
+        for i=1,12 do
+          local button = bar[i]
+          if button then
+            local id = i + (page-1)*12
+            if button.id ~= id then
+              button.id = id
+              updatecache[button.slot] = true
+            end
+          end
+        end
+      end) end
+
+      bar:SetAttribute("_onstate-page", [[ self:SetAttribute("actionpage", tonumber(newstate) or 1) ]])
+      bar:SetAttribute("actionpage", 1)
+      RegisterStateDriver(bar, "page", bar.filter)
     else
       -- append paging enabled bars to the filter list
       for i=1,12 do bar[i]:SetScript("OnAttributeChanged", ButtonSwitch) end
@@ -1119,6 +1173,15 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc", function ()
         f:SetAttribute("action1", button)
         f:SetAttribute("type2", "macro")
         f:SetAttribute("macrotext2", "/click PetActionButton".. button .. " RightButton")
+      elseif pfUI.client >= 30000 then
+        -- 3.x: action = ID + (actionpage-1)*12, the page comes from the bar header
+        f:SetID(button)
+        f:SetAttribute("type", "action")
+        f:SetAttribute("checkselfcast", true)
+        f:SetAttribute("checkfocuscast", true)
+        f:SetAttribute("useparent-unit", true)
+        f:SetAttribute("useparent-actionpage", true)
+        f:SetAttribute("*unit2", C.bars.rightself == "1" and "player" or nil)
       else
         bars[bar]:SetAttribute("addchild", f)
         f:SetAttribute("type", "action")
@@ -1372,7 +1435,10 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc", function ()
     end
 
     -- add up to 0-11 button parent states to each bar
-    if i <= 10 and pfUI.client > 11200 then
+    if i <= 10 and pfUI.client >= 30000 then
+      -- static page for all non paging bars, bar 1 is driven by its state driver
+      if i ~= 1 then bars[i]:SetAttribute("actionpage", i) end
+    elseif i <= 10 and pfUI.client > 11200 then
       bars[i]:SetAttribute("statebutton", "0:S0;1:S1;2:S2;3:S3;4:S4;5:S5;6:S6;7:S7;8:S8;9:S9;10:S10;11:S11;")
       bars[i]:SetAttribute("statebutton2", "0:S0Right;1:S1Right;2:S2Right;3:S3Right;4:S4Right;5:S5Right;6:S6Right;7:S7Right;8:S8Right;9:S9Right;10:S10Right;11:S11Right;")
     end

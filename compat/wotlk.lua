@@ -226,3 +226,8 @@ function GetComboPoints()
   local unit = (_G.UnitHasVehicleUI and _G.UnitHasVehicleUI("player")) and "vehicle" or "player"
   return _G.GetComboPoints(unit, "target")
 end
+
+-- actionbar: PLAYER_AURAS_CHANGED is gone in 3.x, the stance buttons refresh
+-- through the shapeshift events instead. Vehicle/possess bars switch with
+-- UPDATE_BONUS_ACTIONBAR which is already part of the global events.
+ACTIONBAR_EXTRA_AURA_EVENTS = { "UPDATE_SHAPESHIFT_FORM", "UPDATE_SHAPESHIFT_USABLE", "UPDATE_SHAPESHIFT_COOLDOWN" }
