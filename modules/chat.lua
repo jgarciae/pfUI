@@ -675,9 +675,13 @@ pfUI:RegisterModule("chat", "vanilla:tbc:wotlk", function ()
     CreateBackdrop(editbox, default_border)
 
     for i,v in ipairs({editbox:GetRegions()}) do
-      -- WOTLK-CHECK: region order differs in 3.x, hide all border textures
       if legacyeditbox and (i==6 or i==7 or i==8) then v:Hide() end
-      if not legacyeditbox and v.GetObjectType and v:GetObjectType() == "Texture" then v:Hide() end
+      -- 3.x: hide all border textures. ChatEdit_ActivateChat re-shows the
+      -- focusLeft/Right/Mid textures, so also make them fully transparent.
+      if not legacyeditbox and v.GetObjectType and v:GetObjectType() == "Texture" then
+        v:Hide()
+        v:SetAlpha(0)
+      end
       if v.SetFont then
         v:SetFont(pfUI.font_default, C.global.font_size + 1, "OUTLINE")
       end
