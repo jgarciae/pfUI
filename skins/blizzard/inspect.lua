@@ -91,11 +91,16 @@ pfUI:RegisterSkin("Inspect", "tbc:wotlk", function ()
 
     do -- Talent Tab
       StripTextures(InspectTalentFrame)
-      InspectTalentFrameCancelButton:Hide()
+      -- 3.x has no cancel button, the spent points text lives in a points bar
+      if InspectTalentFrameCancelButton then InspectTalentFrameCancelButton:Hide() end
       InspectTalentFrameCloseButton:Hide()
 
-      InspectTalentFrameSpentPoints:ClearAllPoints()
-      InspectTalentFrameSpentPoints:SetPoint("BOTTOMRIGHT", InspectTalentFrame, "BOTTOMRIGHT", 0, 83)
+      if InspectTalentFrameSpentPoints then
+        InspectTalentFrameSpentPoints:ClearAllPoints()
+        InspectTalentFrameSpentPoints:SetPoint("BOTTOMRIGHT", InspectTalentFrame, "BOTTOMRIGHT", 0, 83)
+      elseif InspectTalentFramePointsBar then
+        StripTextures(InspectTalentFramePointsBar)
+      end
 
       StripTextures(InspectTalentFrameScrollFrame)
       SkinScrollbar(InspectTalentFrameScrollFrameScrollBar)
