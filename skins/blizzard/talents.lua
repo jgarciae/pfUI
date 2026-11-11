@@ -69,7 +69,8 @@ pfUI:RegisterSkin("Talents", "vanilla:tbc:wotlk", function ()
 
     -- 3.x: points/preview bars, learn/reset/activate buttons
     -- WOTLK-CHECK: glyph tab and the spec tabs on the side are not skinned yet
-    for _, bar in pairs({ "PointsBar", "PreviewBar", "PointsLeft", "PointsMiddle", "PointsRight" }) do
+    -- (PointsLeft/Middle/Right are textures of StatusFrame, not frames)
+    for _, bar in pairs({ "PointsBar", "PreviewBar", "PreviewBarFiller", "StatusFrame" }) do
       local object = _G[TALENT_FRAME_NAME..bar]
       if object then StripTextures(object) end
     end
