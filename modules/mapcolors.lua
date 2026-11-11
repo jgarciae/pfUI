@@ -89,7 +89,8 @@ pfUI:RegisterModule("mapcolors", function ()
     local _, class = UnitClass(frame.unit)
     local color = RAID_CLASS_COLORS[class]
     frame.name = frame.name or UnitName(frame.unit)
-    frame.name = '|c'..color.colorStr..frame.name..'|r'
+    -- colorStr is not part of RAID_CLASS_COLORS before cataclysm
+    frame.name = rgbhex(color)..frame.name..'|r'
   end
 
   local function UpdateUnitColors(unit_button_name, tooltip)
