@@ -1,4 +1,4 @@
-pfUI:RegisterSkin("Time Manager", "tbc", function ()
+pfUI:RegisterSkin("Time Manager", "tbc:wotlk", function ()
   local rawborder, border = GetBorderSize()
   local bpad = rawborder > 1 and border - GetPerfectPixel() or GetPerfectPixel()
 
