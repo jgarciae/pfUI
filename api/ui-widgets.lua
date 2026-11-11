@@ -958,8 +958,9 @@ function pfUI.api.SkinDropDown(frame, cr, cg, cb, useSmall)
   end
 
   local funcc = button:GetScript("OnClick")
-  button:SetScript("OnClick", function()
-    if funcc then funcc() end
+  button:SetScript("OnClick", function(a1, a2, a3)
+    -- pass the handler args on, 2.x+ xml scripts read "self" instead of "this"
+    if funcc then funcc(a1, a2, a3) end
     local DropDownListWidth = DropDownList1:GetWidth()
     local DropDownFrameWidth = frame.backdrop:GetWidth()
     if DropDownListWidth < DropDownFrameWidth then
