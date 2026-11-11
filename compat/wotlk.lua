@@ -112,8 +112,8 @@ libdebuff = {
 -- WOTLK-CHECK: UnitMana/UnitManaMax are kept as aliases of UnitPower in 3.3.5
 -- (Blizzard code only uses UnitPower). Fall back so vanilla-style modules work.
 if not _G.UnitMana then
-  UnitMana = function(unit) return _G.UnitPower(unit) end
-  UnitManaMax = function(unit) return _G.UnitPowerMax(unit) end
+  UnitMana = _G.UnitPower
+  UnitManaMax = _G.UnitPowerMax
 end
 
 -- 3.x inserted "hasRep" before "isWatched" in GetFactionInfo; drop it so the
@@ -196,10 +196,14 @@ function CancelPlayerBuff(bid)
   _G.CancelUnitBuff("player", index, filter)
 end
 
-getmetatable(_G.GameTooltip).__index.SetPlayerBuff = function(self, bid)
-  if not bid or bid < 0 then return end
-  local index, filter = DecodeBuffID(bid)
-  self:SetUnitAura("player", index, filter)
+-- only fill the gap, never replace a native tooltip method
+local tooltipmethods = getmetatable(_G.GameTooltip).__index
+if not tooltipmethods.SetPlayerBuff then
+  tooltipmethods.SetPlayerBuff = function(self, bid)
+    if not bid or bid < 0 then return end
+    local index, filter = DecodeBuffID(bid)
+    self:SetUnitAura("player", index, filter)
+  end
 end
 
 -- PLAYER_AURAS_CHANGED was replaced by UNIT_AURA (arg1 == "player") in 3.0
@@ -214,7 +218,13 @@ NO_PLAYER_COMBO_EVENT = true
 -- which forwards every call to the currently active edit box (or the first one).
 -- WOTLK-CHECK: SetScript/GetScript/AddHistoryLine hit the active box only.
 local function ActiveEditBox()
-  return (_G.ChatEdit_GetActiveWindow and _G.ChatEdit_GetActiveWindow()) or _G.ChatFrame1EditBox
+  return _G.ChatEdit_GetActiveWindow() or _G.ChatFrame1EditBox
+end
+
+-- the 3.x "im" chat style keeps the edit boxes shown while nobody types, so
+-- the legacy box counts as shown/visible only while one is actually active
+local function EditBoxActive()
+  return _G.ChatEdit_GetActiveWindow() and 1 or nil
 end
 
 -- method forwarders are cached per key (no closure per call) and resolve the
@@ -222,6 +232,7 @@ end
 -- parse on the vanilla (Lua 5.0) client before it returns early.
 local editboxmethods = {}
 ChatFrameEditBox = setmetatable({}, { __index = function(_, key)
+  if key == "IsShown" or key == "IsVisible" then return EditBoxActive end
   local value = ActiveEditBox()[key]
   if type(value) == "function" then
     if not editboxmethods[key] then
@@ -241,6 +252,24 @@ ChatFrameEditBoxLanguage = _G.ChatFrame1EditBoxLanguage
 -- keep the (chatFrame, fontSize) signature of vanilla/tbc.
 function FCF_SetChatWindowFontSize(chatFrame, fontSize)
   return _G.FCF_SetChatWindowFontSize(nil, chatFrame, fontSize)
+end
+
+-- 3.x moved the dropdown frame to the first argument of the UIDropDownMenu
+-- setters; keep the vanilla/tbc (value, frame) order for pfUI callers.
+function UIDropDownMenu_SetWidth(width, frame, padding)
+  return _G.UIDropDownMenu_SetWidth(frame, width, padding)
+end
+
+function UIDropDownMenu_SetButtonWidth(width, frame)
+  return _G.UIDropDownMenu_SetButtonWidth(frame, width)
+end
+
+function UIDropDownMenu_SetText(text, frame)
+  return _G.UIDropDownMenu_SetText(frame, text)
+end
+
+function UIDropDownMenu_JustifyText(justification, frame)
+  return _G.UIDropDownMenu_JustifyText(frame, justification)
 end
 
 -- 3.x CombatFeedback_OnCombatEvent/OnUpdate take the frame as first argument,
