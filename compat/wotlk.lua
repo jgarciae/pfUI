@@ -59,6 +59,16 @@ function UnitBuff(unitstr, i)
   return icon, count
 end
 
+-- TBC layout (name, rank, icon, count, duration, timeleft) used by the unitframes
+-- for hot/buff timers. 3.x returns (name, rank, icon, count, dtype, duration, expirationTime).
+function UnitBuffTimed(unitstr, i)
+  local name, rank, icon, count, dtype, duration, expiration = _G.UnitBuff(unitstr, i)
+  if not name then return end
+  if duration == 0 then duration = nil end
+  local timeleft = (expiration and expiration > 0) and (expiration - GetTime()) or nil
+  return name, rank, icon, count, duration, timeleft
+end
+
 function UnitDebuff(unitstr, i)
   local name, rank, texture, stacks, dtype = _G.UnitDebuff(unitstr, i)
   return texture, stacks, dtype
@@ -187,6 +197,9 @@ end
 
 -- PLAYER_AURAS_CHANGED was replaced by UNIT_AURA (arg1 == "player") in 3.0
 PLAYER_AURA_EVENT = "UNIT_AURA"
+
+-- PLAYER_COMBO_POINTS is gone in 3.x, UNIT_COMBO_POINTS covers it
+NO_PLAYER_COMBO_EVENT = true
 
 --[[ Chat edit box ]]--
 -- vanilla/tbc have one global ChatFrameEditBox, 3.x has one edit box per chat
