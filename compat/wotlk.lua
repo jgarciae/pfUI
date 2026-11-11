@@ -43,6 +43,9 @@ FRIENDS_NAME_LOCATION = "ButtonTextLocation"
 COOLDOWN_FRAME_TYPE = "Cooldown"
 LOOT_BUTTON_FRAME_TYPE = "Button"
 
+-- 3.x loot rolls: need/greed eligibility and the disenchant button (roll.lua)
+ROLL_HAS_DISENCHANT = true
+
 -- WOTLK-CHECK: GetPlayerBuff is still present in 3.3.5 (deprecated); buff.lua
 -- should move to UnitAura in its own commit.
 PLAYER_BUFF_START_ID = 0
