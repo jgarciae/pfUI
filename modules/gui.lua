@@ -1949,6 +1949,13 @@ pfUI:RegisterModule("gui", "vanilla:tbc:wotlk", function ()
       CreateConfig(U["totems"], T["Show Background"], C.totems, "showbg", "checkbox")
     end)
 
+    CreateGUIEntry(T["Buffs"], T["Death Knight Runes"], function()
+      CreateConfig(nil, T["Enable Rune Display"], C.runes, "enable", "checkbox", nil, nil, nil, nil, "wotlk")
+      CreateConfig(U["runes"], T["Rune Size"], C.runes, "size", nil, nil, nil, nil, nil, "wotlk")
+      CreateConfig(U["runes"], T["Spacing"], C.runes, "spacing", "dropdown", pfUI.gui.dropdowns.spacing, nil, nil, nil, "wotlk")
+      CreateConfig(U["runes"], T["Show Cooldown Text"], C.runes, "showtext", "checkbox", nil, nil, nil, nil, "wotlk")
+    end)
+
     CreateGUIEntry(T["Buffs"], T["Player Buff Bar"], function()
       CreateConfig(nil, T["Enable Bar"], C.buffbar.pbuff, "enable", "checkbox")
       CreateConfig(nil, T["Use Unit Fonts"], C.buffbar.pbuff, "use_unitfonts", "checkbox")
