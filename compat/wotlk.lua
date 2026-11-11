@@ -75,3 +75,10 @@ libdebuff = {
     return _G.UnitDebuff(a1,a2,a3)
   end
 }
+
+-- WOTLK-CHECK: UnitMana/UnitManaMax are kept as aliases of UnitPower in 3.3.5
+-- (Blizzard code only uses UnitPower). Fall back so vanilla-style modules work.
+if not _G.UnitMana then
+  UnitMana = function(unit) return _G.UnitPower(unit) end
+  UnitManaMax = function(unit) return _G.UnitPowerMax(unit) end
+end
