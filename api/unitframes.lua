@@ -166,6 +166,12 @@ end)
 
 local aggrodata = { }
 function pfUI.api.UnitHasAggro(unit)
+  -- 3.x: native threat api, 2/3 = the unit is tanking a mob
+  if UnitThreatSituation then
+    local status = UnitThreatSituation(unit)
+    return status and status > 1 and 1 or 0
+  end
+
   if aggrodata[unit] and GetTime() < aggrodata[unit].check + 1 then
     return aggrodata[unit].state
   end
