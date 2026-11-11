@@ -82,3 +82,12 @@ if not _G.UnitMana then
   UnitMana = function(unit) return _G.UnitPower(unit) end
   UnitManaMax = function(unit) return _G.UnitPowerMax(unit) end
 end
+
+-- 3.x inserted "hasRep" before "isWatched" in GetFactionInfo; drop it so the
+-- return layout matches the one pfUI expects from vanilla/tbc.
+function GetFactionInfo(index)
+  local name, description, standingID, barMin, barMax, barValue, atWarWith,
+    canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild = _G.GetFactionInfo(index)
+  return name, description, standingID, barMin, barMax, barValue, atWarWith,
+    canToggleAtWar, isHeader, isCollapsed, isWatched, isChild
+end
