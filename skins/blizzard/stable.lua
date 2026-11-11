@@ -23,6 +23,9 @@ pfUI:RegisterSkin("Pet Stable Master", "vanilla:tbc:wotlk", function ()
   PetStablePetInfo:SetPoint("TOPLEFT", PetStableModel, "TOPLEFT", 10, 0)
 
   local buttons = {"PetStableCurrentPet", "PetStableStabledPet1", "PetStableStabledPet2"}
+  -- 3.x has 4 stable slots
+  if PetStableStabledPet3 then table.insert(buttons, "PetStableStabledPet3") end
+  if PetStableStabledPet4 then table.insert(buttons, "PetStableStabledPet4") end
   for _,v in pairs(buttons) do
     local button = _G[v]
     StripTextures(button)
