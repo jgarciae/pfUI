@@ -2,12 +2,8 @@ pfUI:RegisterModule("vehicle", "wotlk", function ()
   -- The Blizzard MainMenuBar is hidden by the actionbar module, which also hides
   -- everything parented to it: the "leave vehicle" button and the micro buttons.
 
-  -- restore the pfUI micro button layout after the vehicle ui gave them back
-  if pfUI.panel and pfUI.panel.microbutton and pfUI.panel.microbutton.Anchor then
-    hooksecurefunc("VehicleMenuBar_MoveMicroButtons", function(skinName)
-      if not skinName then pfUI.panel.microbutton.Anchor() end
-    end)
-  end
+  -- the Blizzard vehicle ui is still in place when the actionbar module is disabled
+  if C.disabled and C.disabled.actionbar == "1" then return end
 
   -- own vehicle exit button, shown whenever the player is able to leave
   local leave = CreateFrame("Button", "pfVehicleLeave", UIParent)

@@ -67,10 +67,12 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc:wotlk", function ()
     return txt
   end
 
-  -- 3.x re-shows the MainMenuBar when leaving a vehicle. Replacing its Show
-  -- method would taint the vehicle code, so park it on a hidden parent instead.
+  -- 3.x re-shows the MainMenuBar when leaving a vehicle and MultiActionBar_Update
+  -- shows the multi bars. Replacing their Show methods would taint that secure
+  -- code, so park them on a hidden parent instead.
+  local hider
   if pfUI.client >= 30000 then
-    local hider = CreateFrame("Frame", nil, UIParent)
+    hider = CreateFrame("Frame", nil, UIParent)
     hider:Hide()
     MainMenuBar:SetParent(hider)
   end
@@ -79,7 +81,12 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc:wotlk", function ()
   local blizzard_elements = { MultiBarBottomLeft,
     MultiBarBottomRight, MultiBarLeft, MultiBarRight }
   for _, f in pairs(blizzard_elements) do
-    kill(f, true)
+    if hider then
+      f:SetParent(hider)
+      kill(f)
+    else
+      kill(f, true)
+    end
   end
 
   -- enable all possible actionbar pages
@@ -1417,8 +1424,18 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc:wotlk", function ()
             end
 
             local count = GetNumShapeshiftForms()
-            if count ~= this.lastCount then
-              this.lastCount = count
+            local forms = count
+            if pfUI.client >= 30000 then
+              -- the secure "spell" attribute holds the form name, also refresh
+              -- when a form got replaced in place (e.g. bear -> dire bear form)
+              for j=1, count do
+                local _, name = GetShapeshiftFormInfo(j)
+                forms = forms .. ":" .. (name or "")
+              end
+            end
+
+            if forms ~= this.lastCount then
+              this.lastCount = forms
 
               -- hide obsolete buttons
               for i=1, NUM_SHAPESHIFT_SLOTS do
@@ -1686,10 +1703,13 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc:wotlk", function ()
 
       for name, bar in pairs(bindwraps) do
         for i=1,12 do
-          local key = GetBindingKey(format(name, i))
+          local key1, key2 = GetBindingKey(format(name, i))
           local button = bars[bar][i]
-          if key and button then
-            SetOverrideBindingClick(button, false, key, button:GetName(), 'LeftButton')
+          if button then
+            -- drop overrides of keys that got unbound or moved meanwhile
+            ClearOverrideBindings(button)
+            if key1 then SetOverrideBindingClick(button, false, key1, button:GetName(), 'LeftButton') end
+            if key2 then SetOverrideBindingClick(button, false, key2, button:GetName(), 'LeftButton') end
           end
         end
       end
