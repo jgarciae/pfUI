@@ -102,11 +102,13 @@ pfUI:RegisterModule("minimap", "vanilla:tbc:wotlk", function ()
   end
 
   -- dungeon difficulty flag (wotlk)
-  -- WOTLK-CHECK: parent is MinimapCluster, which is left behind by pfUI
+  -- its parent is MinimapCluster, which is left behind by pfUI. The top left
+  -- corner is used by the tracking button, the top right one by the mail icon.
+  -- WOTLK-CHECK: position of the flag on the minimap
   if MiniMapInstanceDifficulty then
     MiniMapInstanceDifficulty:SetParent(pfUI.minimap)
     MiniMapInstanceDifficulty:ClearAllPoints()
-    MiniMapInstanceDifficulty:SetPoint("TOPLEFT", pfUI.minimap, "TOPLEFT", 0, 0)
+    MiniMapInstanceDifficulty:SetPoint("TOP", pfUI.minimap, "TOP", 0, 0)
     MiniMapInstanceDifficulty:SetFrameLevel(Minimap:GetFrameLevel() + 10)
   end
 
