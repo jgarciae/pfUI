@@ -1,4 +1,4 @@
-pfUI:RegisterModule("panel", "vanilla:tbc", function()
+pfUI:RegisterModule("panel", "vanilla:tbc:wotlk", function()
   -- initialize gold cache if not yet happened
   pfUI_cache["gold"] = pfUI_cache["gold"] or {}
 
@@ -835,7 +835,7 @@ pfUI:RegisterModule("panel", "vanilla:tbc", function()
     pfUI.panel.microbutton:SetPoint("TOP", pfUI.panel.minimap, "BOTTOM", 0,  -2*default_border)
     UpdateMovable(pfUI.panel.microbutton)
     pfUI.panel.microbutton:SetHeight(23)
-    pfUI.panel.microbutton:SetWidth(145)
+    pfUI.panel.microbutton:SetWidth(table.getn(MICRO_BUTTONS) * 18 + 1)
     pfUI.panel.microbutton:SetFrameStrata("MEDIUM")
 
     for i=1,table.getn(MICRO_BUTTONS) do
