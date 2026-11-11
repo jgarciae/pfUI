@@ -98,7 +98,7 @@ pfUI:RegisterModule("minimap", "vanilla:tbc:wotlk", function ()
     MiniMapLFGFrame:SetParent(pfUI.minimap)
     MiniMapLFGFrame:ClearAllPoints()
     MiniMapLFGFrame:SetPoint("BOTTOMLEFT", Minimap, -4, -4)
-    if MiniMapLFGBorder then MiniMapLFGBorder:Hide() end
+    MiniMapLFGFrameBorder:Hide()
   end
 
   -- dungeon difficulty flag (wotlk)
