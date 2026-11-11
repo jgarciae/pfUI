@@ -315,6 +315,9 @@ pfUI:RegisterModule("nameplates", "vanilla:tbc:wotlk", function ()
   nameplates:SetScript("OnEvent", function()
     if event == "PLAYER_ENTERING_WORLD" then
       this:SetGameVariables()
+    elseif event == "UNIT_AURA" and arg1 ~= "target" and arg1 ~= "mouseover" and not superwow_active then
+      -- plates only read auras of those units, skip the flood of raid aura events
+      return
     else
       this.eventcache = true
     end
