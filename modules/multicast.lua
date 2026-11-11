@@ -5,7 +5,7 @@ pfUI:RegisterModule("multicast", "wotlk", function ()
 
   -- The totem bar is a child of the MainMenuBar, which the actionbar module
   -- hides. Move it to a movable anchor instead: Blizzard keeps positioning the
-  -- bar relative to its parent (slide animation), so the anchor is all we need.
+  -- bar relative to its parent (slide animation).
   -- WOTLK-CHECK: reparenting a protected frame, only done outside of combat
   local anchor = CreateFrame("Frame", "pfMultiCast", UIParent)
   anchor:SetWidth(230)
@@ -15,7 +15,10 @@ pfUI:RegisterModule("multicast", "wotlk", function ()
 
   local function Attach()
     if InCombatLockdown() then return false end
+    -- the xml anchors it to MainMenuBar; the slide code uses GetParent()
     MultiCastActionBarFrame:SetParent(anchor)
+    MultiCastActionBarFrame:ClearAllPoints()
+    MultiCastActionBarFrame:SetPoint("BOTTOMLEFT", anchor, "TOPLEFT", MULTICASTACTIONBAR_XPOS or 30, 0)
     return true
   end
 

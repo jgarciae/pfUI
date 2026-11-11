@@ -45,8 +45,8 @@ pfUI:RegisterModule("vehicle", "wotlk", function ()
       if arg1 ~= "player" then return end
     end
 
-    -- protected frame, changes during combat are applied afterwards
-    if InCombatLockdown() then return end
+    -- plain button and VehicleExit is not protected (MainMenuBar.xml), so this
+    -- also works in combat
 
     if CanExitVehicle() then this:Show() else this:Hide() end
   end)
