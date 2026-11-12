@@ -381,15 +381,19 @@ message = function(msg)
 end
 print = print or message
 
-error = function(msg)
-  if PF_DEBUG_MODE then message(debugstack()) end
-  if string.find(msg, "AddOns\\pfUI") then
-    DEFAULT_CHAT_FRAME:AddMessage("|cffcc3333ERROR: |cffff5555".. (msg or "nil" ))
-  elseif not pfUI_config or (pfUI_config.global and pfUI_config.global.errors == "1") then
-    DEFAULT_CHAT_FRAME:AddMessage("|cffcc3333ERROR: |cffff5555".. (msg or "nil" ))
+-- WOTLK-CHECK: 3.x error() must keep throwing and errors have to reach
+-- BugGrabber/BugSack, so neither the global nor the handler is replaced there
+if pfUI.expansion ~= "wotlk" then
+  error = function(msg)
+    if PF_DEBUG_MODE then message(debugstack()) end
+    if string.find(msg, "AddOns\\pfUI") then
+      DEFAULT_CHAT_FRAME:AddMessage("|cffcc3333ERROR: |cffff5555".. (msg or "nil" ))
+    elseif not pfUI_config or (pfUI_config.global and pfUI_config.global.errors == "1") then
+      DEFAULT_CHAT_FRAME:AddMessage("|cffcc3333ERROR: |cffff5555".. (msg or "nil" ))
+    end
   end
+  seterrorhandler(error)
 end
-seterrorhandler(error)
 
 function pfUI.SetupCVars()
   ClearTutorials()
