@@ -36,7 +36,10 @@ pfUI:RegisterModule("bags", "vanilla:tbc:wotlk", function ()
   _G.StackSplitFrame:SetClampedToScreen(true)
 
   -- overwrite some bag functions
+  -- pfUI.bag.right only exists after PLAYER_ENTERING_WORLD, but 3.x calls
+  -- these functions earlier (e.g. while other addons load and show panels)
   function _G.OpenAllBags()
+    if not pfUI.bag.right then return end
     if pfUI.bag.right:IsShown() then
       pfUI.bag.right:Hide()
     else
@@ -45,10 +48,12 @@ pfUI:RegisterModule("bags", "vanilla:tbc:wotlk", function ()
   end
 
   function _G.CloseAllBags()
+    if not pfUI.bag.right then return end
     pfUI.bag.right:Hide()
   end
 
   function _G.ToggleBackpack()
+    if not pfUI.bag.right then return end
     if pfUI.bag.right:IsShown() then
       pfUI.bag.right:Hide()
     else
@@ -57,6 +62,7 @@ pfUI:RegisterModule("bags", "vanilla:tbc:wotlk", function ()
   end
 
   function _G.OpenBackpack()
+    if not pfUI.bag.right then return end
     if ( pfUI.bag.right:IsShown() ) then
       ContainerFrame1.backpackWasOpen = 1
       return
