@@ -607,7 +607,7 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc:wotlk", function ()
       -- display autocast
       if autocast then
         self.autocast:Show()
-        self.autocast:SetAlpha(self:GetAlpha() * 0.10)
+        if not self.autocast.pfShine then self.autocast:SetAlpha(self:GetAlpha() * 0.10) end
       else
         self.autocast:Hide()
       end
@@ -1155,12 +1155,22 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc:wotlk", function ()
         f.equipped:SetAllPoints()
         f.equipped:Hide()
       elseif bar == 12 then
-        f.autocast = CreateFrame("Model", nil, f)
-        f.autocast:SetAllPoints()
-        f.autocast:SetModel("Interface\\Buttons\\UI-AutoCastButton.mdx")
-        f.autocast:SetSequence(0)
-        f.autocast:SetSequenceTime(0, 0)
-        f.autocast:Hide()
+        if ACTIONBAR_AUTOCAST_SHINE then
+          -- 3.x has no autocast model, use the sparkles of the Blizzard template
+          local shine = CreateFrame("Frame", nil, f, "AutoCastShineTemplate")
+          shine:SetAllPoints()
+          shine.pfShine = true
+          shine.Show = function(self) AutoCastShine_AutoCastStart(self) end
+          shine.Hide = function(self) AutoCastShine_AutoCastStop(self) end
+          f.autocast = shine
+        else
+          f.autocast = CreateFrame("Model", nil, f)
+          f.autocast:SetAllPoints()
+          f.autocast:SetModel("Interface\\Buttons\\UI-AutoCastButton.mdx")
+          f.autocast:SetSequence(0)
+          f.autocast:SetSequenceTime(0, 0)
+          f.autocast:Hide()
+        end
 
         f.autocastable = f:CreateTexture(nil, "BORDER")
         f.autocastable:SetAllPoints()
@@ -1249,8 +1259,10 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc:wotlk", function ()
 
     -- pet autocast
     if bar == 12 then
-      f.autocast:SetScale(C.bars["bar"..bar].icon_size / 25)
-      f.autocast:SetAlpha(.10)
+      if not f.autocast.pfShine then
+        f.autocast:SetScale(C.bars["bar"..bar].icon_size / 25)
+        f.autocast:SetAlpha(.10)
+      end
     end
 
     -- macro options

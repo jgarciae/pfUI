@@ -46,6 +46,10 @@ end
 IsPetAttackActive = _G.IsPetAttackActive or _G.IsPetAttackAction
 GetPetActionsUsable = _G.GetPetActionsUsable or function() return true end
 
+-- 3.x has no autocast model (UI-AutoCastButton.mdx), the pet bar uses the sparkles
+-- of the AutoCastShineTemplate instead
+ACTIONBAR_AUTOCAST_SHINE = _G.AutoCastShine_AutoCastStart and true or nil
+
 -- [[ Constants ]]--
 CASTBAR_EVENT_CAST_DELAY = "UNIT_SPELLCAST_DELAYED"
 CASTBAR_EVENT_CHANNEL_DELAY = "UNIT_SPELLCAST_CHANNEL_UPDATE"
