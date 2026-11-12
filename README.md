@@ -1,6 +1,6 @@
 # pfUI
 
-An AddOn for World of Warcraft: Vanilla (1.12.1) and The Burning Crusade (2.4.3), which aims to be a full replacement for the original interface. The design is inspired by several screenshots I've seen from TukUI, ElvUI and others. This addon delivers modern features and a minimalistic style that's easy to use right from the start. It is entirely written from scratch without any inclusion of third-party addons or libraries.
+An AddOn for World of Warcraft: Vanilla (1.12.1), The Burning Crusade (2.4.3) and Wrath of the Lich King (3.3.5a), which aims to be a full replacement for the original interface. The design is inspired by several screenshots I've seen from TukUI, ElvUI and others. This addon delivers modern features and a minimalistic style that's easy to use right from the start. It is entirely written from scratch without any inclusion of third-party addons or libraries.
 
 This is **not** an addon-pack like [ShaguUI](http://shagu.org/ShaguUI/), however, there is support for external addons like MobHealth3, DPSMate and others, but they will never be shipped within the package.
 
@@ -26,6 +26,51 @@ This is **not** an addon-pack like [ShaguUI](http://shagu.org/ShaguUI/), however
 3. Rename the folder "pfUI-master" to "pfUI-tbc"
 4. Copy "pfUI-tbc" into Wow-Directory\Interface\AddOns
 5. Restart Wow
+
+## Installation (Wrath of the Lich King)
+1. Download **[Latest Version](https://github.com/jgarciae/pfUI/archive/wotlk-all.zip)** or clone it:
+   `git clone -b wotlk-all https://github.com/jgarciae/pfUI.git pfUI-wotlk`
+2. Unpack the Zip file
+3. Rename the folder "pfUI-wotlk-all" to "pfUI-wotlk"
+4. Copy "pfUI-wotlk" into Wow-Directory\Interface\AddOns
+5. Restart Wow
+
+## Wrath of the Lich King (3.3.5a)
+
+The WotLK port shares the codebase with Vanilla and TBC. Every client difference
+lives in `compat/wotlk.lua` (constants and small API shims), so modules keep the
+vanilla-style API and upstream merges stay conflict-free. Vanilla and TBC
+behavior is unchanged.
+
+**Adapted for 3.3.5**
+- Action bars rebuilt on `SecureHandlerStateTemplate` + `RegisterStateDriver`:
+  stance/form pages, possess and vehicle bar (page 11), pet and stance bars,
+  hover keybinding. Blizzard bars are hidden through a hidden parent (no taint).
+- Nameplates for the 3.3 plate layout, including the native castbar.
+- Unit frames: runic power, vehicles, `UnitAura` timers (expirationTime),
+  threat via `UnitThreatSituation`, native range check, 3.x dropdown menus.
+- Buffs, chat (one edit box per window, IM style), bags (keyring), loot and
+  group roll (need/greed/disenchant eligibility and disenchant button),
+  minimap (LFG eye, dungeon difficulty), micro bar (10 buttons), tooltips.
+- About 30 Blizzard skins, plus the 3.x character currency tab and talents.
+
+**New WotLK-only modules**
+- Death Knight runes (`/pfui` → Death Knight Runes)
+- Shaman totem bar (movable via `/unlock`)
+- Vehicle leave button
+- Skins: Achievements, Calendar, Glyphs, Dungeon Finder
+
+**Not enabled on WotLK** (native 3.3.5 feature or not ported yet)
+- Sell value, world map and map reveal (native vendor price and windowed map)
+- Social module and the Friends, Quest Log, Professions, Interface Options,
+  Help, Arena and Battlefield skins (Blizzard default is kept)
+- Vanilla-only modules (focus emulation, mouseover cast, SuperWoW, etc.)
+
+**Known limitations**
+- Heal prediction only sees other pfUI users (no LibHealComm-4.0).
+- Player title selector, PvP frame and Raid Browser are not skinned.
+- Lines marked `-- WOTLK-CHECK:` in the code are untested assumptions about the
+  3.3.5 client; please report errors from BugSack/!BugGrabber.
 
 ## Commands
 
