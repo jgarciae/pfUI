@@ -1157,7 +1157,8 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc:wotlk", function ()
       elseif bar == 12 then
         if ACTIONBAR_AUTOCAST_SHINE then
           -- 3.x has no autocast model, use the sparkles of the Blizzard template
-          local shine = CreateFrame("Frame", nil, f, "AutoCastShineTemplate")
+          -- the template names its sparkles after the frame, a name is required
+          local shine = CreateFrame("Frame", button_name .. "Shine", f, "AutoCastShineTemplate")
           shine:SetAllPoints()
           shine.pfShine = true
           shine.Show = function(self) AutoCastShine_AutoCastStart(self) end
