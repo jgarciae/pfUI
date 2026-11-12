@@ -41,6 +41,11 @@ function GetDifficultyColor(level)
   return _G.GetQuestDifficultyColor(level)
 end
 
+-- pet bar: IsPetAttackActive is called IsPetAttackAction in 3.x and the
+-- GetPetActionsUsable check is gone (pet actions are always usable)
+IsPetAttackActive = _G.IsPetAttackActive or _G.IsPetAttackAction
+GetPetActionsUsable = _G.GetPetActionsUsable or function() return true end
+
 -- [[ Constants ]]--
 CASTBAR_EVENT_CAST_DELAY = "UNIT_SPELLCAST_DELAYED"
 CASTBAR_EVENT_CHANNEL_DELAY = "UNIT_SPELLCAST_CHANNEL_UPDATE"

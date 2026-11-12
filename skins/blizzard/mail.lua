@@ -17,9 +17,17 @@ pfUI:RegisterSkin("Mailbox", "vanilla:tbc:wotlk", function ()
           local btn = _G["SendMailAttachment"..i]
           HandleIcon(btn, btn:GetNormalTexture())
 
-          local link = GetSendMailItemLink(i)
-          if link then
-            local r,g,b = GetItemQualityColor(select(3, GetItemInfo(link)))
+          local quality
+          if GetSendMailItemLink then
+            local link = GetSendMailItemLink(i)
+            quality = link and select(3, GetItemInfo(link))
+          else
+            -- 3.x returns the quality as 4th value of GetSendMailItem
+            quality = select(4, GetSendMailItem(i))
+          end
+
+          if quality then
+            local r,g,b = GetItemQualityColor(quality)
             btn:SetBackdropBorderColor(r,g,b,1)
             else
             btn:SetBackdropBorderColor(GetStringColor(pfUI_config.appearance.border.color))
