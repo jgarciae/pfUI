@@ -3,6 +3,33 @@ setfenv(1, pfUI:GetEnvironment())
 
 if pfUI.expansion ~= "wotlk" then return end
 
+-- Button:SetTextColor/GetTextColor/SetFont were removed in 3.x. Only add the
+-- missing methods (nothing of Blizzard is replaced) and forward them to the
+-- button's fontstring, so vanilla-style modules keep working unchanged.
+do
+  local button = getmetatable(CreateFrame("Button")).__index
+  if not button.SetTextColor then
+    function button.SetTextColor(self, r, g, b, a)
+      local fs = self:GetFontString()
+      if fs then fs:SetTextColor(r, g, b, a) end
+    end
+  end
+
+  if not button.GetTextColor then
+    function button.GetTextColor(self)
+      local fs = self:GetFontString()
+      if fs then return fs:GetTextColor() end
+    end
+  end
+
+  if not button.SetFont then
+    function button.SetFont(self, font, size, flags)
+      local fs = self:GetFontString()
+      if fs then fs:SetFont(font, size, flags) end
+    end
+  end
+end
+
 -- [[ Constants ]]--
 CASTBAR_EVENT_CAST_DELAY = "UNIT_SPELLCAST_DELAYED"
 CASTBAR_EVENT_CHANNEL_DELAY = "UNIT_SPELLCAST_CHANNEL_UPDATE"
