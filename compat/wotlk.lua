@@ -36,6 +36,11 @@ function HideNameplates() SetCVar("nameplateShowEnemies", 0) end
 function ShowFriendNameplates() SetCVar("nameplateShowFriends", 1) end
 function HideFriendNameplates() SetCVar("nameplateShowFriends", 0) end
 
+-- GetDifficultyColor was renamed to GetQuestDifficultyColor in 3.x
+function GetDifficultyColor(level)
+  return _G.GetQuestDifficultyColor(level)
+end
+
 -- [[ Constants ]]--
 CASTBAR_EVENT_CAST_DELAY = "UNIT_SPELLCAST_DELAYED"
 CASTBAR_EVENT_CHANNEL_DELAY = "UNIT_SPELLCAST_CHANNEL_UPDATE"
