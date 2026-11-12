@@ -184,7 +184,7 @@ function pfUI:UpdateFonts()
   UIDROPDOWNMENU_DEFAULT_TEXT_HEIGHT = 11
 
   -- change default game font objects
-  SystemFont:SetFont(default, 15)
+  if SystemFont then SystemFont:SetFont(default, 15) end -- not present on 3.x
   GameFontNormal:SetFont(default, 12)
   GameFontBlack:SetFont(default, 12)
   GameFontNormalSmall:SetFont(default, 11)
