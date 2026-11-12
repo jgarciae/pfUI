@@ -591,9 +591,11 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc:wotlk", function ()
     end
 
     -- icon
-    if texture ~= self.texture then
+    -- an icon that never got a texture is drawn as a white square on 3.x,
+    -- so empty slots have to clear it once as well
+    if (texture or false) ~= self.texture then
       self.icon:SetTexture(texture)
-      self.texture = texture
+      self.texture = texture or false
     end
 
     -- handle pet bar quirks
