@@ -493,8 +493,13 @@ function pfUI.api.CreateScrollFrame(name, parent)
   end)
 
   f.UpdateScrollState = function()
+    -- SetValue triggers OnValueChanged which calls this again. 3.x rounds the
+    -- scroll to float32 (9.9999998 vs 10) and would loop forever
+    if f.updating then return end
+    f.updating = true
     f.slider:SetMinMaxValues(0, f:GetVerticalScrollRange())
     f.slider:SetValue(f:GetVerticalScroll())
+    f.updating = nil
 
     local m = f:GetHeight()+f:GetVerticalScrollRange()
     local v = f:GetHeight()
