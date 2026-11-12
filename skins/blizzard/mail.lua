@@ -43,12 +43,20 @@ pfUI:RegisterSkin("Mailbox", "vanilla:tbc:wotlk", function ()
         SkinButton(_G["OpenMailAttachmentButton"..i], nil, nil, nil, _G["OpenMailAttachmentButton"..i.."IconTexture"], true)
       end
 
-      hooksecurefunc("InboxFrame_OnClick", function(index)
+      hooksecurefunc("InboxFrame_OnClick", function(a1, a2)
+        -- 3.x passes (button, index), tbc only the index
+        local index = type(a1) == "table" and a2 or a1
+        if not index then return end
+
         for i=1, ATTACHMENTS_MAX_RECEIVE do
           local link = GetInboxItemLink(index, i)
           if not link then return end
-          local r,g,b = GetItemQualityColor(select(3, GetItemInfo(link)))
-          _G["OpenMailAttachmentButton"..i]:SetBackdropBorderColor(r,g,b,1)
+          local quality = select(3, GetItemInfo(link))
+          local button = _G["OpenMailAttachmentButton"..i]
+          if quality and button and button.SetBackdropBorderColor then
+            local r,g,b = GetItemQualityColor(quality)
+            button:SetBackdropBorderColor(r,g,b,1)
+          end
         end
       end)
 

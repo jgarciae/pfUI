@@ -530,7 +530,8 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc:wotlk", function ()
       bar = self.bar
       id = sid
       _, _, texture, token, active, castable, autocast = GetPetActionInfo(id)
-      texture = token and _G[texture] or texture
+      -- a token without a texture global would end up as an invalid path (white square)
+      if token then texture = _G[texture] end
     else
       active = IsCurrentAction(sid) or IsAutoRepeatAction(sid)
       texture = GetActionTexture(sid)

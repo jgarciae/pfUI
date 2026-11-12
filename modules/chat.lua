@@ -475,6 +475,14 @@ pfUI:RegisterModule("chat", "vanilla:tbc:wotlk", function ()
 
     hooksecurefunc("FCF_RestorePositionAndDimensions", Reanchor)
     hooksecurefunc("FCF_UpdateDockPosition", Reanchor)
+
+    -- pfUI only anchors TOPLEFT and BOTTOMRIGHT, any other anchor added by the
+    -- client or another addon over-constrains the frame and shifts the text
+    for i=1, NUM_CHAT_WINDOWS do
+      hooksecurefunc(_G["ChatFrame" .. i], "SetPoint", function(self, point)
+        if point ~= "TOPLEFT" and point ~= "BOTTOMRIGHT" then Reanchor() end
+      end)
+    end
   end
 
   if C.chat.global.tabmouse == "1" then
