@@ -678,7 +678,12 @@ function pfUI.api.SkinButton(button, cr, cg, cb, icon, disableHighlight)
     b:SetPushedTexture(nil)
   end
 
-  b:SetFont(pfUI.font_default, pfUI_config.global.font_size, "OUTLINE")
+  if b.SetFont then
+    b:SetFont(pfUI.font_default, pfUI_config.global.font_size, "OUTLINE")
+  elseif b.GetFontString and b:GetFontString() then
+    -- Button:SetFont was removed in 3.x, set the font on its fontstring
+    b:GetFontString():SetFont(pfUI.font_default, pfUI_config.global.font_size, "OUTLINE")
+  end
 
   b.LockHighlight = function()
     b:SetBackdropBorderColor(cr,cg,cb,1)
