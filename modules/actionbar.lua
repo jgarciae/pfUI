@@ -1516,26 +1516,30 @@ pfUI:RegisterModule("actionbar", "vanilla:tbc:wotlk", function ()
       bars[i]:SetPoint("BOTTOM", bars[1], "TOP", 0, -spacing)
     elseif i == 11 then -- stances
       bars[i]:SetPoint("BOTTOM", bars[6], "TOP", 0, 3*border)
+
+      -- make stance bar dodge the pet bar by default. Both bars can show up
+      -- in any order (3.x drives their visibility with state drivers), so the
+      -- position is evaluated whenever one of them gets shown or hidden.
+      bars[i].Dodge = function()
+        if InCombatLockdown and InCombatLockdown() then return end
+        if not bars[11]:IsShown() then return end
+
+        bars[11]:ClearAllPoints()
+        if bars[12] and bars[12]:IsShown() then
+          bars[11]:SetPoint("BOTTOM", bars[12], "TOP", 0, 3*border)
+        else
+          bars[11]:SetPoint("BOTTOM", bars[6], "TOP", 0, 3*border)
+        end
+        UpdateMovable(bars[11], true)
+      end
+
+      bars[i]:SetScript("OnShow", bars[i].Dodge)
     elseif i == 12 then -- pet
       bars[i]:SetPoint("BOTTOM", bars[6], "TOP", 0, 3*border)
 
-      -- make stance bar dodge by default
-      bars[i]:SetScript("OnShow", function()
-        if bars[11] and bars[11]:IsShown() then
-          bars[11]:ClearAllPoints()
-          bars[11]:SetPoint("BOTTOM", bars[12], "TOP", 0, 3*border)
-          UpdateMovable(bars[11], true)
-        end
-      end)
-
-      -- restore old stance bar position
-      bars[i]:SetScript("OnHide", function()
-        if bars[11] and bars[11]:IsShown() then
-          bars[11]:ClearAllPoints()
-          bars[11]:SetPoint("BOTTOM", bars[6], "TOP", 0, 3*border)
-          UpdateMovable(bars[11], true)
-        end
-      end)
+      bars[i]:SetScript("OnShow", function() if bars[11] and bars[11].Dodge then bars[11].Dodge() end end)
+      bars[i]:SetScript("OnHide", function() if bars[11] and bars[11].Dodge then bars[11].Dodge() end end)
+      if bars[11] and bars[11].Dodge then bars[11].Dodge() end
     else -- others
       bars[i]:SetPoint("TOP", 0, -i*50)
     end
