@@ -429,6 +429,12 @@ pfUI:RegisterModule("chat", "vanilla:tbc:wotlk", function ()
       _G["ChatFrame" .. i .. "TabMiddle"]:SetAlpha(0)
       _G["ChatFrame" .. i .. "TabRight"]:SetAlpha(0)
 
+      -- 3.x draws extra textures for the selected and highlighted tab
+      for _, tex in pairs({ "SelectedLeft", "SelectedMiddle", "SelectedRight", "HighlightLeft", "HighlightMiddle", "HighlightRight" }) do
+        local texture = _G["ChatFrame" .. i .. "Tab" .. tex]
+        if texture then texture:SetAlpha(0) end
+      end
+
       if C.chat.global.chatflash == "1" then
         _G["ChatFrame" .. i .. "TabFlash"]:SetAllPoints(_G["ChatFrame" .. i .. "TabText"])
       else
@@ -455,6 +461,21 @@ pfUI:RegisterModule("chat", "vanilla:tbc:wotlk", function ()
   end
 
   hooksecurefunc("FCF_SaveDock", pfUI.chat.RefreshChat)
+
+  -- WOTLK-CHECK: 3.x moves the chat frames by itself (saved layout, default dock
+  -- position 32px from the screen edge), anchor them to the pfUI panels again
+  if FCF_RestorePositionAndDimensions then
+    local anchoring
+    local function Reanchor()
+      if anchoring then return end
+      anchoring = true
+      pfUI.chat.RefreshChat()
+      anchoring = nil
+    end
+
+    hooksecurefunc("FCF_RestorePositionAndDimensions", Reanchor)
+    hooksecurefunc("FCF_UpdateDockPosition", Reanchor)
+  end
 
   if C.chat.global.tabmouse == "1" then
     pfUI.chat.mouseovertab = CreateFrame("Frame")
