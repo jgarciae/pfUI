@@ -97,6 +97,12 @@ pfUI:RegisterModule("addonbuttons", "vanilla:tbc:wotlk", function ()
     return false
   end
 
+  -- IsFrameType got replaced by IsObjectType in 3.x
+  local function IsType(frame, type)
+    if frame.IsFrameType then return frame:IsFrameType(type) end
+    return frame:IsObjectType(type)
+  end
+
   local function IsButtonValid(frame)
     -- ignore invalid and invisible frames
     if not frame:GetName() then return false end
@@ -107,17 +113,17 @@ pfUI:RegisterModule("addonbuttons", "vanilla:tbc:wotlk", function ()
     if frame:GetWidth() > pfUI.addonbuttons.max_button_size then return false end
 
     -- ignore other frame types
-    if not frame:IsFrameType("Button") and not frame:IsFrameType("Frame") then return false end
+    if not IsType(frame, "Button") and not IsType(frame, "Frame") then return false end
 
     -- ignore manually selected frames
     if TablePartialMatch(ignored_icons, frame:GetName()) then return false end
 
     -- check button/frame script handlers
-    if frame:IsFrameType("Button") then
+    if IsType(frame, "Button") then
       if frame:GetScript("OnClick") or frame:GetScript("OnMouseDown") or frame:GetScript("OnMouseUp") then
         return true
       end
-    elseif frame:IsFrameType("Frame") and (strfind(strlower(frame:GetName()), "icon") or strfind(strlower(frame:GetName()), "button")) then
+    elseif IsType(frame, "Frame") and (strfind(strlower(frame:GetName()), "icon") or strfind(strlower(frame:GetName()), "button")) then
       if frame:GetScript("OnMouseDown") or frame:GetScript("OnMouseUp") then
         return true
       end
